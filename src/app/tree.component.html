@@ -1,0 +1,9 @@
+<ul>
+	<li *ngFor="let aggregate of aggregates" (click)="onSelectAggregate(aggregate, $event)" style="border: 1px darkorchid dashed"
+	[style.background]="aggregate==viewState.selectedAggregate ? 'yellow' : white">
+		{{aggregate.name}}-{{aggregate.hash}}
+		<fwb-tree-node [aggregate]="aggregate"></fwb-tree-node>
+	</li>
+</ul>
+
+<!--(onSelectAggregateEvent)="selectAggregateEvent"-->

@@ -1,0 +1,8 @@
+<button (click)="createNew()">create new workflow</button>
+<button (click)="undo(1)">Undo</button>
+<button (click)="redo(1)">Redo</button>
+<button (click)="fork()">Fork</button>
+<button (click)="addAggregate()">Add Aggregate</button>
+
+<fwb-tree [aggregates]="getRootAggregates()">
+</fwb-tree>
