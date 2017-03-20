@@ -16,6 +16,7 @@
 <button (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())">Redo</button>
 <button (click)="fork(getForkNum())">Fork</button>
 <button (click)="mergeDialogDisplayed = true">Merge</button>
+<button (click)="TODO">Synchronize Fork</button>
 <button (click)="addAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])">Add Aggregate</button>
 
 <fwb-tree [aggregates]="getRootAggregates()" [fork]="getForkNum()">

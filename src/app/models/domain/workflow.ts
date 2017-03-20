@@ -5,7 +5,7 @@ export class Workflow {
     private root: Array<WorkflowAggregate>;
 
     constructor(private readonly forkFrom: number,
-    private name?: string) {
+        private name?: string) {
         this.name = name;
         this.root = [];
     }

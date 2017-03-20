@@ -64,17 +64,37 @@ export class WorkflowManager {
         }
     }
 
-    optimize = (fork: number) => {
+    optimize = (forkId: number): void => {
         console.log("TODO:  Optimize before fork!")
     }
 
-    mergeWorkflow = (fork: number, type: MergeType) => {
-        switch(type) {
-            case MergeType.FirstOrder :
+    firstOrderMergeWorkflow = (forkId: number) => {
+        // trucate domain side (or undo up to forked location, apply, then redo)
 
-            case MergeType.LastOrder : 
-            
+    }
+
+    lastOrderMergeWorkflow = (forkId: number) => {
+        // domain stays intact
+        // get parent 
+        var fork = this.domainStore.getWorkflow(forkId);
+        var parentForkId = fork.getParent();
+        //      get fork 
+        var commandFork = this.commandStore.findFork(forkId);
+        // get the forks stack
+        var lengthToCopy = commandFork.getCurrentLength();
+        var commands = commandFork.getArchive().slice(0, lengthToCopy);
+        // apply forked commands on parent as-is, Track errors with try-catch
+        var warnings: Array<string> = []; // todo make type warning???
+        for (let command of commands) {
+            try {
+                this.commandBus.executeCommand(parentForkId, command, true)
+            }
+            catch (e) {
+                warnings.push(e);
+                console.log(`Error:  ${e}`);
+            }            
         }
+        // then what?  remove fork?  we can only do this once.
     }
 
     isLoaded = (): boolean => {

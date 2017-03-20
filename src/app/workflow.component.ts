@@ -95,10 +95,17 @@ export class WorkflowComponent {
         return forks;
     }
 
-    merge = (forkFrom: number, type: MergeType) => {
-        console.log(`Merge ${forkFrom} with type ${type}`);
-        
-        this.workflowManager.mergeWorkflow(forkFrom);
+    merge = (forkId: number, type: MergeType) => {
+        console.log(`Merge ${forkId} with type ${type}`);
+        switch (type) {
+            case MergeType.FirstOrder:
+                this.workflowManager.firstOrderMergeWorkflow(forkId);
+            case MergeType.LastOrder:
+                this.workflowManager.lastOrderMergeWorkflow(forkId);
+            case MergeType.ByAggregate:
+
+        }
+        //this.workflowManager.mergeWorkflow(forkFrom);
         this.mergeDialogDisplayed = false;
     }
 
