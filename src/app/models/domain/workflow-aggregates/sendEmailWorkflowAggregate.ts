@@ -1,5 +1,6 @@
 import { WorkflowAggregate } from './workflowAggregate';
-import { TypeInjector } from '../../../services/type-injector.service';
+import { Property } from '../property';
+import { TypeStore } from '../../../services/type-store.service';
 
 export class SendEmailWorkflowAggregate extends WorkflowAggregate {
 
@@ -10,15 +11,17 @@ export class SendEmailWorkflowAggregate extends WorkflowAggregate {
             "onSuccess": [],
             "onFail": []
         };
+
+        this.initializeProperties();
     }
 
-    sendTo: string;
+    sendTo: Property = new Property();
 
-    subject: string;
+    subject: Property = new Property();
 
-    message: string;
+    message: Property = new Property();
 
     name = "Send Email";
 }
 
-TypeInjector.put(SendEmailWorkflowAggregate.prototype.constructor.name, SendEmailWorkflowAggregate);
+TypeStore.put(SendEmailWorkflowAggregate.prototype.constructor.name, SendEmailWorkflowAggregate);

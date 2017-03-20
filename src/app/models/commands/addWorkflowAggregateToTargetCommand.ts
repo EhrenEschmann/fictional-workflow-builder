@@ -4,9 +4,9 @@ import { QueryBus } from '../../services/query-bus.service';
 import { AggregateFactory } from '../../services/aggregate-factory.service';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
 import { CreateNewWorkflowAggregateCommand } from './createNewWorkflowAggregateCommand';
-import {TypeInjector} from '../../services/type-injector.service';
+import { TypeStore } from '../../services/type-store.service';
 
-export class AddWorkflowAggregateToParentCommand extends Command {
+export class AddWorkflowAggregateToTargetCommand extends Command {
 
     constructor(public targetHash: string,
         public targetEvent: string,
@@ -36,4 +36,4 @@ export class AddWorkflowAggregateToParentCommand extends Command {
     }
 }
 
-TypeInjector.put(AddWorkflowAggregateToParentCommand.prototype.constructor.name, AddWorkflowAggregateToParentCommand);
+TypeStore.put(AddWorkflowAggregateToTargetCommand.prototype.constructor.name, AddWorkflowAggregateToTargetCommand);

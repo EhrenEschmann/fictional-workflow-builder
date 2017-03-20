@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { WorkflowAggregate } from '../models/domain/workflow-aggregates/workflowAggregate';
 import { SendEmailWorkflowAggregate } from '../models/domain/workflow-aggregates/sendEmailWorkflowAggregate';
 import { DomainCache } from '../services/domain-cache.service';
-import { TypeInjector } from '../services/type-injector.service';
+import { TypeStore } from '../services/type-store.service';
 
 @Injectable()
 export class AggregateFactory {
@@ -17,7 +17,7 @@ export class AggregateFactory {
     }
 
     createAggregateByType = (stringType: string, fork: number, hash: string): any => {
-        var type = TypeInjector.get(stringType);
+        var type = TypeStore.get(stringType);
         return this.createAggregate(type, fork, hash);
     }
 }

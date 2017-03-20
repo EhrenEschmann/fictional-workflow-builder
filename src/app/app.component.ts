@@ -2,12 +2,13 @@ import { Component } from '@angular/core';
 import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate';
 import { HashGenerator } from './services/hash-generator.service';
 import { CreateNewWorkflowAggregateCommand } from './models/commands/createNewWorkflowAggregateCommand';
-import { AddWorkflowAggregateToParentCommand } from './models/commands/addWorkflowAggregateToParentCommand';
+import { AddWorkflowAggregateToTargetCommand } from './models/commands/addWorkflowAggregateToTargetCommand';
 import { AddWorkflowAggregateToRootCommand } from './models/commands/addWorkflowAggregateToRootCommand';
 import { WorkflowManager } from './services/workflow-manager.service';
 import { CommandBus } from './services/command-bus.service';
 import { DomainStore } from './services/domain-store.service';
 import { ViewState } from './services/view-state.service';
+import { Workflow } from './models/domain/workflow';
 
 @Component({
   selector: "fwb-app",
@@ -26,33 +27,12 @@ export class AppComponent {
     this.workflowManager.createWorkflow("test");
   }
 
-  undo = (count: number): void => {
-    this.commandBus.undoCommand(0, count);
+  activeWorkflow = (): boolean => {
+    return this.domainStore.getForks() !== undefined;
   }
 
-  redo = (count: number): void => {
-    this.commandBus.redoCommand(0, count);
-  }
-
-  addAggregate = (fork: number, parentHash: string, event: string): void => {
-
-    var createCommand = new CreateNewWorkflowAggregateCommand("PostRestApiWorkflowAggregate", this.hashGenerator.createHash());
-
-    // var addCommand = new AddWorkflowAggregateToTargetCommand(parentHash, event, createCommand);
-    var addCommand = new AddWorkflowAggregateToRootCommand(createCommand);
-
-    fork = 0;
-    this.commandBus.executeCommand(fork, addCommand);
-  }
-
-  getRootAggregates = (): Array<WorkflowAggregate> => {
-    if (this.domainStore.getWorkflow(0))
-      return this.domainStore.getWorkflow(0).rootAggregate();
-  }
-
-  selectAggregate = (aggregate: WorkflowAggregate, event: string): void => {
-    console.log(aggregate, event);
-    this.viewState.selectedAggregate = aggregate;
-    this.viewState.selectedEvent = event;
+  getRootFork = (): Workflow => {
+    if (this.workflowManager.isLoaded())
+      return this.domainStore.getForks()[0];
   }
 }

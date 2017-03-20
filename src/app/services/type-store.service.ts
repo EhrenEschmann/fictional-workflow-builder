@@ -7,19 +7,18 @@ import { DomainCache } from './domain-cache.service';
 import { DomainStore } from './domain-store.service';
 
 @Injectable()
-export class TypeInjector {
+export class TypeStore {
 
     private static types: Dictionary<any> = {};
 
     static put = (stringType: string, type: any) => {
         console.log(`Adding ${stringType} to dictionary`);
-        TypeInjector.types[stringType] = type;
+        TypeStore.types[stringType] = type;
     }
 
     static get = (stringType: string) => {
-        if (!TypeInjector.types[stringType])
+        if (!TypeStore.types[stringType])
             throw Error(`${stringType} does not exist in dictionary`);
-        return TypeInjector.types[stringType];
+        return TypeStore.types[stringType];
     }
-
 }

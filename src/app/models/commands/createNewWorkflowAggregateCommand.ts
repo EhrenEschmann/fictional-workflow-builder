@@ -2,7 +2,7 @@ import { Command } from './command';
 import { FutureTargetSettableCommand } from './futureTargetSettableCommand';
 import { QueryBus } from '../../services/query-bus.service';
 import { AggregateFactory } from '../../services/aggregate-factory.service';
-import {TypeInjector} from '../../services/type-injector.service';
+import { TypeStore } from '../../services/type-store.service';
 
 export class CreateNewWorkflowAggregateCommand extends Command {
 
@@ -29,4 +29,4 @@ export class CreateNewWorkflowAggregateCommand extends Command {
     }
 }
 
-TypeInjector.put(CreateNewWorkflowAggregateCommand.prototype.constructor.name, CreateNewWorkflowAggregateCommand);
+TypeStore.put(CreateNewWorkflowAggregateCommand.prototype.constructor.name, CreateNewWorkflowAggregateCommand);

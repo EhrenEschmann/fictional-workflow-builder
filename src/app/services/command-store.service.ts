@@ -5,46 +5,79 @@ import { Command } from "../models/commands/command";
 
 @Injectable()
 export class CommandStore {
-  private workflow: Array<CommandFork>;
+  private workflow: CommandFork; // root of tree
 
   constructor() { }
 
   startMainLine = (): void => {
-    this.workflow = [];
-    this.workflow.push(new CommandFork(0));
+    this.workflow = new CommandFork(0, 0, undefined);
   }
 
   loadFork = (workflowForks: Array<CommandFork>): void => {
-    this.workflow = workflowForks;
+    //this.workflow = workflowForks;
   }
 
-  fork = (fromFork: number): void => {
-    var start = this.workflow[fromFork].getLength();
-    this.workflow.push(new CommandFork(start));
+  private find(workflow: CommandFork, fork: number): CommandFork {
+    if (workflow.getId() == fork) return workflow;
+    var foundFork: CommandFork;
+    for (let child of workflow.getChildren()) {
+      foundFork = this.find(child, fork);
+      if(foundFork)
+        return foundFork;
+    }
+    return undefined;
   }
 
-  execute = (fork: number, command: Command): void => {
-    this.workflow[fork].storeCommand(command);
+  findFork = (fork: number): CommandFork => {
+    return this.find(this.workflow, fork);
+  }
+
+  private countChildren(workflow: CommandFork): number {
+    if(!workflow.getChildren()) return 0;
+    var sum = 0;
+    for (let child of workflow.getChildren()) {
+      sum += this.countChildren(child) + 1;
+    }
+    return sum;
+  }
+
+  private getSize(): number {
+    return this.countChildren(this.workflow) + 1;
+  }
+
+  fork = (fromFork: number): number => {
+    var fork = this.findFork(fromFork);
+    var newId = this.getSize();
+    fork.setUndoLimit();
+    fork.addChild(new CommandFork(newId, fork.getCurrentLength(), fork));
+    return newId;
+  }
+
+  store = (fork: number, command: Command): void => {
+    this.findFork(fork).storeCommand(command);
   }
 
   undo = (fork: number): Command => {
-    return this.workflow[fork].getUndoCommand();
+    return this.findFork(fork).getUndoCommand();
   }
 
   redo = (fork: number): Command => {
-    return this.workflow[fork].getRedoCommand();
+    return this.findFork(fork).getRedoCommand();
   }
 
   getCommandCount = (fork: number): number => {
-    return this.workflow[fork].getUndoLength();
+    return this.findFork(fork).getCurrentLength();
   }
 
   getRedoCount = (fork: number): number => {
-    return this.workflow[fork].getRedoLength();
+    return this.findFork(fork).getRedoLength();
+  }
+
+  getArchive = (fork: number): Array<Command> => {
+    return this.findFork(fork).getArchive()
   }
 
   getArchiveTitles = (fork: number): Array<string> => {
-       var titles = [];
-       return this.workflow[fork].getArchive().map((command: Command) => command.title);
+    return this.getArchive(fork).map((command: Command) => command.title);
   }
 }

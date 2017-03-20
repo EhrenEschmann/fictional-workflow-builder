@@ -12,8 +12,9 @@ export class CommandBus {
         private readonly aggregateFactory: AggregateFactory,
         private readonly queryBus: QueryBus) { }
 
-    executeCommand = (fork: number, command: Command): void => {
-        this.commandStore.execute(fork, command);
+    executeCommand = (fork: number, command: Command, persist: boolean): void => {
+        if(persist)
+            this.commandStore.store(fork, command);
         command.execute(fork, this.queryBus, this.aggregateFactory);
     }
 

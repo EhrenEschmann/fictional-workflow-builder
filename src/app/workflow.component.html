@@ -1,0 +1,27 @@
+<p-dialog [(visible)]="mergeDialogDisplayed">
+    <p-header>
+        Merge {{getForkNum()}} up to {{workflow.getParent()}}
+    </p-header>
+    TODO:  Define merges here
+    <p-footer>
+        <button (click)="merge(getForkNum(), MergeType.FirstOrder)">First Order</button>
+        <button (click)="merge(getForkNum(), MergeType.LastOrder)">Last Order</button>
+        <button (click)="merge(getForkNum(), MergeType.ByAggregate)">By Aggregate</button>
+    </p-footer>
+    merge(getForkNum())
+</p-dialog>
+<hr />
+<span>{{getForkNum()}}</span>
+<button (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())">Undo</button>
+<button (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())">Redo</button>
+<button (click)="fork(getForkNum())">Fork</button>
+<button (click)="mergeDialogDisplayed = true">Merge</button>
+<button (click)="addAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])">Add Aggregate</button>
+
+<fwb-tree [aggregates]="getRootAggregates()" [fork]="getForkNum()">
+</fwb-tree>
+
+<div style="margin-left: 10px; border-left: 5px solid deeppink">
+    <fwb-workflow *ngFor="let fork of getChildrenForks()" [workflow]="fork">
+    </fwb-workflow>
+</div>

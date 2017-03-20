@@ -1,25 +1,27 @@
 import { Dictionary } from '../../collections/dictionary';
 import { AggregateRoot } from '../aggregateRoot';
+import { Property } from '../property';
+
 
 export abstract class WorkflowAggregate implements AggregateRoot {
 
-    constructor(public hash: string) {
-        this.initializeProperties();
-     }
+    constructor(private readonly hash: string) { }
+
+    getHash = (): string => {
+        return this.hash;
+    }
 
     abstract name: string;
 
-    properties: Dictionary<any>;
+    properties: Dictionary<Property> = {};
 
     protected initializeProperties = (): void => {
         let aggregate: WorkflowAggregate = this;
         this.properties = {};
         for (let propertyName in aggregate) {
             if (aggregate.hasOwnProperty(propertyName)) {
-                if (propertyName != "events") {
-                    var property = aggregate[propertyName];
-                    this.properties[propertyName] = property;
-                }
+                if(aggregate[propertyName] instanceof Property)
+                this.properties[propertyName] = aggregate[propertyName];
             }
         }
     }

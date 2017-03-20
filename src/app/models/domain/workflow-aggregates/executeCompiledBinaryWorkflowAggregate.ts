@@ -1,5 +1,6 @@
 import { WorkflowAggregate } from './workflowAggregate';
-import {TypeInjector} from '../../../services/type-injector.service';
+import { Property } from '../property';
+import { TypeStore } from '../../../services/type-store.service';
 
 export class ExecuteCompiledBinaryWorkflowAggregate extends WorkflowAggregate {
 
@@ -10,13 +11,15 @@ export class ExecuteCompiledBinaryWorkflowAggregate extends WorkflowAggregate {
             "onSuccess": [],
             "onFail": []
         };
+
+        this.initializeProperties();
     }
 
-    location: string;
+    location: Property = new Property();
 
-    parameters: Array<string>;
+    parameters: Property = new Property();
 
     name = "Execute Compiled Binary";
 }
 
-TypeInjector.put(ExecuteCompiledBinaryWorkflowAggregate.prototype.constructor.name, ExecuteCompiledBinaryWorkflowAggregate);
+TypeStore.put(ExecuteCompiledBinaryWorkflowAggregate.prototype.constructor.name, ExecuteCompiledBinaryWorkflowAggregate);

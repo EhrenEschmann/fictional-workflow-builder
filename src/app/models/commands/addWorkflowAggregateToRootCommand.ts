@@ -5,7 +5,7 @@ import { AggregateFactory } from '../../services/aggregate-factory.service';
 import { Workflow } from '../domain/workflow';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
 import { CreateNewWorkflowAggregateCommand } from './createNewWorkflowAggregateCommand';
-import {TypeInjector} from '../../services/type-injector.service';
+import { TypeStore } from '../../services/type-store.service';
 
 export class AddWorkflowAggregateToRootCommand extends Command {
 
@@ -33,4 +33,4 @@ export class AddWorkflowAggregateToRootCommand extends Command {
     }
 }
 
-TypeInjector.put(AddWorkflowAggregateToRootCommand.prototype.constructor.name, AddWorkflowAggregateToRootCommand);
+TypeStore.put(AddWorkflowAggregateToRootCommand.prototype.constructor.name, AddWorkflowAggregateToRootCommand);

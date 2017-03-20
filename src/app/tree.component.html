@@ -1,9 +1,14 @@
 <ul>
-	<li *ngFor="let aggregate of aggregates" (click)="onSelectAggregate(aggregate, $event)" style="border: 1px darkorchid dashed"
-	[style.background]="aggregate==viewState.selectedAggregate ? 'yellow' : white">
-		{{aggregate.name}}-{{aggregate.hash}}
-		<fwb-tree-node [aggregate]="aggregate"></fwb-tree-node>
+	<li *ngFor="let aggregate of aggregates" (click)="onSelectAggregate(fork, aggregate, $event)" style="border: 1px darkorchid dashed"
+	 [style.background]="aggregate==viewState.selectedAggregate[fork] ? 'yellow' : white">
+		{{aggregate.name}} | {{aggregate.hash}}
+		<div>
+			<fwb-property-editor *ngFor="let propertyKvp of aggregate.properties | values" [key]="propertyKvp.key" [property]="propertyKvp.value"
+				(valueChanged)="updateProperty(fork, aggregate, propertyKvp.key, $event)"></fwb-property-editor>
+			<!--<span *ngFor="let property of aggregate.properties | values"></span>-->
+		</div>
+		<fwb-tree-node [aggregate]="aggregate" [fork]="fork"></fwb-tree-node>
 	</li>
 </ul>
 
-<!--(onSelectAggregateEvent)="selectAggregateEvent"-->
+<!--(onSelectAggregateEvent)="selectAggregateEvent($event[1],$event[2])"-->

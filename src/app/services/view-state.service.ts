@@ -8,9 +8,17 @@ import { DomainStore } from './domain-store.service';
 @Injectable()
 export class ViewState {
 
-  constructor() { }
+  constructor() { 
+    this.selectedAggregate = [];
+    this.selectedEvent = [];
+  }
 
-  selectedAggregate: WorkflowAggregate;
-  selectedEvent: string;
+  selectedAggregate: Array<WorkflowAggregate>;
+  selectedEvent: Array<string>;
+
+  clearSelectedAggregates = (fork: number) => {
+    this.selectedAggregate[fork] = undefined;
+    this.selectedEvent[fork] = undefined;
+  }
 
 }

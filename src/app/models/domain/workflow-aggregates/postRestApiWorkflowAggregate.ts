@@ -1,5 +1,6 @@
 import { WorkflowAggregate } from './workflowAggregate';
-import {TypeInjector} from '../../../services/type-injector.service';
+import { Property } from '../property';
+import { TypeStore } from '../../../services/type-store.service';
 
 export class PostRestApiWorkflowAggregate extends WorkflowAggregate {
 
@@ -10,13 +11,15 @@ export class PostRestApiWorkflowAggregate extends WorkflowAggregate {
             "onSuccess": [],
             "onFail": []
         };
+
+        this.initializeProperties();
     }
 
-    url: string;
+    url: Property = new Property();
 
-    body: string;
+    body: Property = new Property();
 
     name = "Post Rest API";
 }
 
-TypeInjector.put(PostRestApiWorkflowAggregate.prototype.constructor.name, PostRestApiWorkflowAggregate);
+TypeStore.put(PostRestApiWorkflowAggregate.prototype.constructor.name, PostRestApiWorkflowAggregate);

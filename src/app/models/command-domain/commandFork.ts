@@ -2,20 +2,55 @@ import { CommandStack } from "./commandStack";
 import { Command } from "../commands/command";
 
 export class CommandFork {
-
+    
     private commands: CommandStack;
 
-    constructor(private readonly start: number,
-        private readonly forkFrom?: number) {
+    private childrenForks: Array<CommandFork>;
+
+    private undoLimit: number = 0;
+
+    constructor(private readonly id: number,
+        private readonly start: number,
+        private readonly parentFork?: CommandFork) {
+
         this.commands = new CommandStack();
+        this.childrenForks = [];
     }
 
-    getLength = (): number => {
+    getId = () :number => {
+        return this.id;
+    }
+    
+    addChild = (fork : CommandFork):void => {
+        this.childrenForks.push(fork);
+    }
+
+    getParent = (): CommandFork => {
+        return this.parentFork;
+    }
+
+    getChildren = (): Array<CommandFork> => {
+        return this.childrenForks;
+    }
+
+    getStart = (): number => {
+        return this.start;
+    }
+    // getLength = (): number => {
+    //     throw new Error("todo: get length of this stack + this.start + parent starts")
+    //     //return this.commands.getLength(); 
+    // }
+
+    setUndoLimit = (): void => {
+        this.undoLimit = this.commands.getLength();
+    }
+
+    getCurrentLength = (): number => {
         return this.commands.getLength();
     }
 
     getUndoLength = (): number => {
-        return this.getLength();
+        return this.commands.getLength() - this.undoLimit;
     }
 
     getRedoLength = (): number => {

@@ -13,19 +13,28 @@ export class DomainStore {
 
     create = (name: string) => {
         this.workflowForks = [];
-        this.workflowForks.push(new Workflow(name));
+        this.workflowForks.push(new Workflow(undefined, name));
     }
 
     load = () => {
         // TODO:  pass in information from database
     }
 
-    fork = (fork: number): void => {
-        this.workflowForks[fork] = new Workflow();
+    fork = (fromFork: number): number => {
+        this.workflowForks.push(new Workflow(fromFork, `fork from ${fromFork}`));
+        return this.workflowForks.length-1;
     }
 
-    getWorkflow = (fork: number) : Workflow => {
-        if(!this.workflowForks) return null;
+    getWorkflow = (fork: number): Workflow => {
+        if (!this.workflowForks) return null;
         return this.workflowForks[fork];
+    }
+
+    getForks = () :Array<Workflow> => {
+        return this.workflowForks;
+    }
+
+    isLoaded = (): boolean => {
+        return !(this.workflowForks == undefined);
     }
 }

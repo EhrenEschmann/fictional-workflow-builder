@@ -2,10 +2,10 @@ import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggrega
 
 export class Workflow {
 
-    private name: string;
     private root: Array<WorkflowAggregate>;
 
-    constructor(name?: string) {
+    constructor(private readonly forkFrom: number,
+    private name?: string) {
         this.name = name;
         this.root = [];
     }
@@ -18,4 +18,7 @@ export class Workflow {
         return this.root;
     }
 
+    getParent = (): number => {
+        return this.forkFrom;
+    }
 }

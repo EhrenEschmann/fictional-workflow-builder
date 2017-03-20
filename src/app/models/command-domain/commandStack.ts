@@ -2,40 +2,74 @@ import { Command } from "../commands/command";
 
 export class CommandStack {
 
-    private stack: Array<Command>;
-    private location: number;
-    
-    constructor() {
-        this.stack = [];
+    private location: LinkedNode;
+
+    constructor() { 
+        var nullRoot = new LinkedNode();
+        this.location = nullRoot;
     }
 
     push = (command: Command): void => {
-        for (let i = 0; i < this.location; i++)
-            this.stack.pop();
-        this.location = 0;
-        this.stack.push(command);
+        var node = new LinkedNode(command);
+        node.previous = this.location;
+
+        if(this.location)
+            this.location.next = node;
+
+        this.location = node;
     }
 
     unPop = (): Command => {
-        this.location--;
-        return this.stack[this.getLength() - 1];
+        this.location = this.location.next;
+        return this.location.getCommand();
     }
 
     pop = (): Command => {
-        var command = this.stack[this.getLength() - 1];
-        this.location++;
+        var command = this.location.getCommand();
+        this.location = this.location.previous;
         return command;
     }
 
     getLength = (): number => {
-        return this.stack.length - this.location;
+        var temp: LinkedNode = this.location;
+        var count = 0;
+        while (temp.getCommand() != undefined) {
+            temp = temp.previous;
+            count++;
+        }
+        return count;
     }
 
     getLocation = (): number => {
-        return this.location; 
+        var temp: LinkedNode = this.location;
+        var count = -1;
+        while (temp != undefined) {
+            temp = temp.next;
+            count++;
+        }
+        return count;
     }
 
     getArchive = (): Array<Command> => {
-        return this.stack;
+        var temp: LinkedNode = this.location;
+        var archive: Array<Command> = [];
+        while (temp.getCommand() != undefined) {
+            archive.unshift(temp.getCommand());
+            temp = temp.previous;
+        }
+        return archive;
     }
+}
+
+class LinkedNode {
+
+    constructor(private readonly command?: Command) { }
+
+    getCommand = () => {
+        return this.command;
+    }
+
+    previous: LinkedNode;
+
+    next: LinkedNode;
 }

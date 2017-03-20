@@ -1,7 +1,7 @@
 <ul>
-    <li *ngFor="let eventName of aggregateEvents()" (click)="onSelectAggregate(aggregate, eventName, $event)" style="border: 1px burlywood dashed"
-        [style.background]="aggregate==viewState.selectedAggregate && eventName == viewState.selectedEvent ? 'red' : white">
+    <li *ngFor="let eventName of aggregateEvents()" (click)="onSelectAggregate(fork, aggregate, eventName, $event)" style="border: 1px burlywood dashed"
+        [style.background]="aggregate==viewState.selectedAggregate[fork] && eventName == viewState.selectedEvent[fork] ? 'red' : white">
         <span>{{eventName}} -</span>
-        <fwb-tree [aggregates]="aggregate.events[eventName]"></fwb-tree>
+        <fwb-tree [aggregates]="aggregate.events[eventName]" [fork]="fork"></fwb-tree>
     </li>
 </ul>

@@ -7,20 +7,19 @@ import { ViewState } from "./services/view-state.service";
     templateUrl: './app/tree-node.component.html'
 })
 export class TreeNodeComponent implements OnInit {
+    @Input() fork: number;
     @Input() aggregate: WorkflowAggregate;
     //@Output() onSelectAggregate: EventEmitter<any> = new EventEmitter();
 
-    constructor(private readonly viewState: ViewState) {
-
-    }
+    constructor(private readonly viewState: ViewState) { }
 
     aggregateEvents = (): Array<string> => {
         return Object.keys(this.aggregate.events);
     }
 
-    onSelectAggregate = (aggregate: WorkflowAggregate, event: string, mouseEvent: MouseEvent): void => {
-        this.viewState.selectedAggregate = aggregate;
-        this.viewState.selectedEvent = event;
+    onSelectAggregate = (fork: number, aggregate: WorkflowAggregate, event: string, mouseEvent: MouseEvent): void => {
+        this.viewState.selectedAggregate[fork] = aggregate;
+        this.viewState.selectedEvent[fork] = event;
         // this.onSelectAggregate.emit([aggregate, event, mouseEvent]);
         console.log(aggregate, event);
         mouseEvent.stopPropagation();

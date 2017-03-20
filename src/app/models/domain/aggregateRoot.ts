@@ -1,6 +1,6 @@
 
 export interface AggregateRoot {
 
-    hash: string;
+    getHash: () => string;
     
 }
