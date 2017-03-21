@@ -4,10 +4,15 @@ export class Workflow {
 
     private root: Array<WorkflowAggregate>;
 
-    constructor(private readonly forkFrom: number,
+    constructor(private readonly forkId: number,
+        private readonly forkFrom: number,
         private name?: string) {
         this.name = name;
         this.root = [];
+    }
+
+    getForkId = () => {
+        return this.forkId;
     }
 
     setName = (name: string) => {

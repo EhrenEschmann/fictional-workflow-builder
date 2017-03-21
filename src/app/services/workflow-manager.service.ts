@@ -7,6 +7,7 @@ import { Workflow } from "../models/domain/workflow";
 import { Command } from "../models/commands/command";
 import { MergeType } from "../models/domain/mergeType";
 
+// TODO:  The public contract should all exist on the command or querybus (commandBus.initialize(), queryBus.initialize())
 @Injectable()
 export class WorkflowManager {
 
@@ -49,9 +50,17 @@ export class WorkflowManager {
         var commandFork = this.commandStore.fork(fromFork);
         if (domainFork !== commandFork) throw new Error("inconsistent domain/command fork state");
         this.domainCache.createCache(domainFork);
-        var previousCommands: Array<Command> = [];
 
-        var fork = this.commandStore.findFork(fromFork);
+        var previousCommands: Array<Command> = this.getCommands(fromFork);
+
+        for (let command of previousCommands) {
+            this.commandBus.executeCommand(domainFork, command, false);
+        }
+    }
+
+    getCommands = (forkId: number): Array<Command> => {
+        var previousCommands: Array<Command> = [];
+        var fork = this.commandStore.findFork(forkId);
         var lengthToCopy = fork.getCurrentLength();
         while (fork !== undefined) {
             previousCommands = fork.getArchive().slice(0, lengthToCopy).concat(previousCommands);
@@ -59,9 +68,7 @@ export class WorkflowManager {
             fork = fork.getParent();
         }
 
-        for (let command of previousCommands) {
-            this.commandBus.executeCommand(domainFork, command, false);
-        }
+        return previousCommands;
     }
 
     optimize = (forkId: number): void => {
@@ -81,7 +88,7 @@ export class WorkflowManager {
         //      get fork 
         var commandFork = this.commandStore.findFork(forkId);
         // get the forks stack
-        var lengthToCopy = commandFork.getCurrentLength();
+        var lengthToCopy = commandFork.getUndoLength();
         var commands = commandFork.getArchive().slice(0, lengthToCopy);
         // apply forked commands on parent as-is, Track errors with try-catch
         var warnings: Array<string> = []; // todo make type warning???
@@ -92,15 +99,17 @@ export class WorkflowManager {
             catch (e) {
                 warnings.push(e);
                 console.log(`Error:  ${e}`);
-            }            
+            }
         }
-        // then what?  remove fork?  we can only do this once.
+        // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
+        // we will prevent undo, then additional merges will only affect from that merge and on.
+        //commandFork.setUndoLimit();
+        // TODO: 1. assign children forks as children of parent.
+        // TODO: 2. delete (nullify) this fork
     }
 
     isLoaded = (): boolean => {
         return this.domainStore.isLoaded();
     }
-
-
 
 }

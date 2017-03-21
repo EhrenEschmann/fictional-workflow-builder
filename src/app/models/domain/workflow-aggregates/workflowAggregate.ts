@@ -26,5 +26,6 @@ export abstract class WorkflowAggregate implements AggregateRoot {
         }
     }
 
+    parent: Array<WorkflowAggregate>;
     events: Dictionary<Array<WorkflowAggregate>>;
 }

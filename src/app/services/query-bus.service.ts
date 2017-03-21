@@ -14,6 +14,10 @@ export class QueryBus {
   getRootObject = (fork: number): Workflow => {
     return this.domainStore.getWorkflow(fork)
   }
+  
+  getRootObjects = (): Array<Workflow> => {
+    return this.domainStore.getForks();
+  }
 
   getTypedAggregateRoot = <T>(fork: number, hash: string): T => {
     throw new Error("Not Built Yet.")

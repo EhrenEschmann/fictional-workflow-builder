@@ -15,7 +15,9 @@ export class AddWorkflowAggregateToRootCommand extends Command {
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
         this.createCommand.execute(fork, queryBus, aggregateFactory);
         var target = queryBus.getRootObject(fork) as Workflow;
-        target.rootAggregate().push(queryBus.getAggregateRoot(fork, this.createCommand.targetHash) as WorkflowAggregate);
+        var newAggregate = queryBus.getAggregateRoot(fork, this.createCommand.targetHash) as WorkflowAggregate;
+        newAggregate.parent = target.rootAggregate();
+        target.rootAggregate().push(newAggregate);
         this.title = `${this.createCommand.title} and adding it to main workflow`;
     }
 

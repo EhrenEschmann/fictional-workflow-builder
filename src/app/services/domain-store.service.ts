@@ -13,7 +13,7 @@ export class DomainStore {
 
     create = (name: string) => {
         this.workflowForks = [];
-        this.workflowForks.push(new Workflow(undefined, name));
+        this.workflowForks.push(new Workflow(0, undefined, name));
     }
 
     load = () => {
@@ -21,7 +21,8 @@ export class DomainStore {
     }
 
     fork = (fromFork: number): number => {
-        this.workflowForks.push(new Workflow(fromFork, `fork from ${fromFork}`));
+        var newForkId = this.workflowForks.length;
+        this.workflowForks.push(new Workflow(newForkId, fromFork, `fork from ${fromFork}`));
         return this.workflowForks.length-1;
     }
 

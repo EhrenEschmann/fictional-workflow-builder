@@ -8,16 +8,21 @@
         <button (click)="merge(getForkNum(), MergeType.LastOrder)">Last Order</button>
         <button (click)="merge(getForkNum(), MergeType.ByAggregate)">By Aggregate</button>
     </p-footer>
-    merge(getForkNum())
 </p-dialog>
 <hr />
 <span>{{getForkNum()}}</span>
 <button (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())">Undo</button>
 <button (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())">Redo</button>
 <button (click)="fork(getForkNum())">Fork</button>
-<button (click)="mergeDialogDisplayed = true">Merge</button>
-<button (click)="TODO">Synchronize Fork</button>
+<button (click)="mergeDialogDisplayed = true" [disabled]="getParentId(getForkNum()) == undefined"> Merge</button>
+<button (click)="TODO" [disabled]="getChildrenForks().length == 0">Synchronize Fork</button>
 <button (click)="addAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])">Add Aggregate</button>
+<!--<select>
+  <option *ngFor="let commandTitle of getCommandTitles(getForkNum())" value="{{commandTitle}}">
+     {{commandTitle}}
+  </option>
+</select>-->
+<span>{{getStackLengths(getForkNum()).join(' + ')}}</span>
 
 <fwb-tree [aggregates]="getRootAggregates()" [fork]="getForkNum()">
 </fwb-tree>

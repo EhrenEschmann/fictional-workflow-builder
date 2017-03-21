@@ -1,7 +1,7 @@
 <ul>
 	<li *ngFor="let aggregate of aggregates" (click)="onSelectAggregate(fork, aggregate, $event)" style="border: 1px darkorchid dashed"
 	 [style.background]="aggregate==viewState.selectedAggregate[fork] ? 'yellow' : white">
-		{{aggregate.name}} | {{aggregate.hash}}
+		{{aggregate.name}} | {{aggregate.hash}} <button (click)="deleteAggregate(fork, aggregate.hash)">delete</button>
 		<div>
 			<fwb-property-editor *ngFor="let propertyKvp of aggregate.properties | values" [key]="propertyKvp.key" [property]="propertyKvp.value"
 				(valueChanged)="updateProperty(fork, aggregate, propertyKvp.key, $event)"></fwb-property-editor>

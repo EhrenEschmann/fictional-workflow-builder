@@ -12,6 +12,7 @@ import { ViewState } from './services/view-state.service';
 import { Workflow } from "./models/domain/workflow";
 import { MergeType } from "./models/domain/mergeType";
 import { MergeTypeAware } from "./decorators/mergeTypeAware.decorator";
+import { Command } from "./models/commands/command";
 
 @Component({
     selector: "fwb-workflow",
@@ -27,7 +28,6 @@ export class WorkflowComponent {
     constructor(private readonly hashGenerator: HashGenerator,
         private readonly workflowManager: WorkflowManager,
         private readonly commandBus: CommandBus,
-        private readonly domainStore: DomainStore,
         private readonly queryBus: QueryBus,
         private readonly viewState: ViewState) { }
 
@@ -47,6 +47,10 @@ export class WorkflowComponent {
         // }
     }
 
+    getParentId = (forkId: number): number => {
+        return this.queryBus.getRootObject(forkId).getParent();
+    }
+
     canRedo = (forkId: number): boolean => {
         return this.workflowManager.canRedo(forkId);
     }
@@ -56,7 +60,7 @@ export class WorkflowComponent {
     }
 
     getForkNum = (): number => {
-        return this.domainStore.getForks().indexOf(this.workflow);
+        return this.workflow.getForkId();
     }
 
     addAggregate = (fork: number, parent: WorkflowAggregate, event: string, aggregateType: string): void => {
@@ -73,9 +77,9 @@ export class WorkflowComponent {
     }
 
     getRootAggregates = (): Array<WorkflowAggregate> => {
-        var fork = this.getForkNum();
-        if (this.domainStore.getWorkflow(fork))
-            return this.domainStore.getWorkflow(fork).rootAggregate();
+        var forkId = this.getForkNum();
+        if (this.queryBus.getRootObject(forkId))
+            return this.queryBus.getRootObject(forkId).rootAggregate();
     }
 
     fork = (forkFrom: number) => {
@@ -89,10 +93,9 @@ export class WorkflowComponent {
     }
 
     getChildrenForks = (): Array<Workflow> => {
-        var forks = this.domainStore.getForks().filter((workflow: Workflow) => {
+        return this.queryBus.getRootObjects().filter((workflow: Workflow) => {
             return workflow.getParent() === this.getForkNum();
         });
-        return forks;
     }
 
     merge = (forkId: number, type: MergeType) => {
@@ -109,5 +112,19 @@ export class WorkflowComponent {
         this.mergeDialogDisplayed = false;
     }
 
+    getCommandTitles = (forkId: number): Array<string> => {
+        return this.workflowManager.getCommands(forkId).map((c:Command) => c.title);
+    }
 
+    getStackLengths =(forkId:number): Array<number> => {
+        var lengths: Array<number> = [];
+        var currentFork = this.queryBus.getRootObject(forkId);
+
+        while (currentFork != undefined) {
+            lengths.push(this.commandBus.getCommandArchive(currentFork.getForkId()).length);
+            currentFork = this.queryBus.getRootObject(currentFork.getParent());
+        }
+
+        return lengths.reverse();
+    }
 }

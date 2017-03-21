@@ -16,7 +16,9 @@ export class AddWorkflowAggregateToTargetCommand extends Command {
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
         this.createCommand.execute(fork, queryBus, aggregateFactory);
         var target = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
-        target.events[this.targetEvent].push(queryBus.getAggregateRoot(fork, this.createCommand.targetHash) as WorkflowAggregate);
+        var newAggregate = queryBus.getAggregateRoot(fork, this.createCommand.targetHash) as WorkflowAggregate;
+        newAggregate.parent = target.events[this.targetEvent];
+        target.events[this.targetEvent].push(newAggregate);
         this.title = `${this.createCommand.title} and adding it to ${target.name}'s ${this.targetEvent} event`;
     }
 
