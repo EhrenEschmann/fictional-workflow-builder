@@ -4,6 +4,7 @@ import { CommandBus } from "./command-bus.service";
 import { DomainStore } from "./domain-store.service";
 import { DomainCache } from "./domain-cache.service";
 import { Workflow } from "../models/domain/workflow";
+import { CommandFork } from "../models/command-domain/commandFork";
 import { Command } from "../models/commands/command";
 import { MergeType } from "../models/domain/mergeType";
 
@@ -80,32 +81,39 @@ export class WorkflowManager {
 
     }
 
-    lastOrderMergeWorkflow = (forkId: number) => {
+    lastOrderMergeWorkflow = (fromFork: CommandFork, toForkId: number) => {
         // domain stays intact
-        // get parent 
-        var fork = this.domainStore.getWorkflow(forkId);
-        var parentForkId = fork.getParent();
-        //      get fork 
-        var commandFork = this.commandStore.findFork(forkId);
+        // // get parent 
+        // var fork = this.domainStore.getWorkflow(forkId);
+        // var parentForkId = fork.getParent();
+        // //      get fork 
+        // var commandFork = this.commandStore.findFork(forkId);
         // get the forks stack
-        var lengthToCopy = commandFork.getUndoLength();
-        var commands = commandFork.getArchive().slice(0, lengthToCopy);
+        var lengthToCopy = fromFork.getUndoLength();
+        var commands = fromFork.getArchive().slice(0, lengthToCopy);
         // apply forked commands on parent as-is, Track errors with try-catch
         var warnings: Array<string> = []; // todo make type warning???
         for (let command of commands) {
             try {
-                this.commandBus.executeCommand(parentForkId, command, true)
+                this.commandBus.executeCommand(toForkId, command, true)
             }
             catch (e) {
                 warnings.push(e);
                 console.log(`Error:  ${e}`);
             }
         }
+        //--------------------------------------
         // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
         // we will prevent undo, then additional merges will only affect from that merge and on.
         //commandFork.setUndoLimit();
         // TODO: 1. assign children forks as children of parent.
+        //   --> Unfortunately, children are no longer the same since their parent is changed,  reinitialize the fork ? 
+        //            - no, leave it. we can store the start so we can choose to ignore all the changes after the start
+        //            - wait, we can store the first start, but the second start could occur later in it's history (last order merge)
+        //            - force a merge up after this completes, that will fix our problem.
+        //            - prevent merges if children exist???
         // TODO: 2. delete (nullify) this fork
+        //--------------------------------------
     }
 
     isLoaded = (): boolean => {

@@ -4,6 +4,7 @@ import { CommandStore } from "./command-store.service";
 import { AggregateFactory } from "./aggregate-factory.service";
 import { Command } from "../models/commands/command";
 import { Dictionary } from "../models/collections/dictionary";
+import { CommandFork } from "../models/command-domain/commandFork";
 
 @Injectable()
 export class CommandBus {
@@ -42,5 +43,9 @@ export class CommandBus {
 
     getCommandArchive = (fork: number): Array<string> => {
         return this.commandStore.getArchiveTitles(fork);
+    }
+
+    getFork = (fork: number) : CommandFork => {
+        return this.commandStore.findFork(fork);
     }
 }

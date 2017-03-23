@@ -10,8 +10,8 @@ export class CommandFork {
     private undoLimit: number = 0;
 
     constructor(private readonly id: number,
-        private readonly start: number,
-        private readonly parentFork?: CommandFork) {
+        private start: number,
+        private parentFork?: CommandFork) {
 
         this.commands = new CommandStack();
         this.childrenForks = [];
@@ -27,6 +27,11 @@ export class CommandFork {
 
     getParent = (): CommandFork => {
         return this.parentFork;
+    }
+
+    setParent = (newParent: CommandFork): void => {
+        this.start = this.start + newParent.getStart();
+        this.parentFork = newParent;
     }
 
     getChildren = (): Array<CommandFork> => {

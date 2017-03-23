@@ -100,11 +100,12 @@ export class WorkflowComponent {
 
     merge = (forkId: number, type: MergeType) => {
         console.log(`Merge ${forkId} with type ${type}`);
+        var fork = this.commandBus.getFork(forkId);
         switch (type) {
             case MergeType.FirstOrder:
                 this.workflowManager.firstOrderMergeWorkflow(forkId);
             case MergeType.LastOrder:
-                this.workflowManager.lastOrderMergeWorkflow(forkId);
+                this.workflowManager.lastOrderMergeWorkflow(fork, fork.getParent().getId() );
             case MergeType.ByAggregate:
 
         }
