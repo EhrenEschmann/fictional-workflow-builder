@@ -6,25 +6,23 @@ export abstract class WorkflowAggregate implements AggregateRoot {
 
     constructor(private readonly hash: string) { }
 
+    abstract name: string;
+    parent: Array<WorkflowAggregate>;
+    events: Dictionary<Array<WorkflowAggregate>>;
+    properties: Dictionary<Property> = {};
+
     getHash = (): string => {
         return this.hash;
     }
-
-    abstract name: string;
-
-    properties: Dictionary<Property> = {};
 
     protected initializeProperties = (): void => {
         let aggregate: WorkflowAggregate = this;
         this.properties = {};
         for (let propertyName in aggregate) {
             if (aggregate.hasOwnProperty(propertyName)) {
-                if(aggregate[propertyName] instanceof Property)
-                this.properties[propertyName] = aggregate[propertyName];
+                if (aggregate[propertyName] instanceof Property)
+                    this.properties[propertyName] = aggregate[propertyName];
             }
         }
     }
-
-    parent: Array<WorkflowAggregate>;
-    events: Dictionary<Array<WorkflowAggregate>>;
 }

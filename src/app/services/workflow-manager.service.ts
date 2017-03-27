@@ -1,19 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CommandStore } from "./command-store.service";
-import { CommandBus } from "./command-bus.service";
-import { DomainStore } from "./domain-store.service";
-import { DomainCache } from "./domain-cache.service";
-import { Workflow } from "../models/domain/workflow";
-import { CommandFork } from "../models/command-domain/commandFork";
-import { Command } from "../models/commands/command";
-import { MergeType } from "../models/domain/mergeType";
-import { CreateNewWorkflowAggregateCommand } from "../models/commands/createNewWorkflowAggregateCommand";
-import { UpdatePropertyCommand } from "../models/commands/updatePropertyCommand";
-import { MoveCommand } from "../models/commands/moveCommand";
-import { Dictionary } from "../models/collections/dictionary";
-import { AggregateCommandPartition } from "../models/command-domain/aggregateCommandPartition";
-import { CommandType } from "../models/command-domain/commandType";
-import { CommandOptimizer } from "./command-optimizer.service";
+import { CommandStore } from './command-store.service';
+import { CommandBus } from './command-bus.service';
+import { DomainStore } from './domain-store.service';
+import { DomainCache } from './domain-cache.service';
+import { CommandFork } from '../models/command-domain/commandFork';
+import { Command } from '../models/commands/command';
+import { CommandOptimizer } from './command-optimizer.service';
 
 // TODO:  The public contract should all exist on the command or querybus (commandBus.initialize(), queryBus.initialize())
 @Injectable()
@@ -27,14 +19,13 @@ export class WorkflowManager {
     ) { }
 
     createWorkflow = (name: string) => {
-        name = "TODO_temp";
+        name = 'TODO_temp';
         this.domainStore.create(name);
         this.commandStore.startMainLine();
         this.domainCache.createCache(0);
     }
 
     loadWorkflow = () => {
-
         // TODO: get from database
 
         // TODO: hardcode from app.component for now.
@@ -43,24 +34,24 @@ export class WorkflowManager {
     }
 
     canUndo = (forkId: number): boolean => {
-        var fork = this.commandStore.findFork(forkId);
+        let fork = this.commandStore.findFork(forkId);
 
-        return fork.getUndoLength() == 0;
+        return fork.getUndoLength() === 0;
     }
 
     canRedo = (forkId: number): boolean => {
-        var fork = this.commandStore.findFork(forkId);
+        let fork = this.commandStore.findFork(forkId);
 
-        return fork.getRedoLength() == 0;
+        return fork.getRedoLength() === 0;
     }
 
     forkWorkflow = (fromFork: number) => {
-        var domainFork = this.domainStore.fork(fromFork);
-        var commandFork = this.commandStore.fork(fromFork);
-        if (domainFork !== commandFork) throw new Error("inconsistent domain/command fork state");
+        let domainFork = this.domainStore.fork(fromFork);
+        let commandFork = this.commandStore.fork(fromFork);
+        if (domainFork !== commandFork) throw new Error('inconsistent domain/command fork state');
         this.domainCache.createCache(domainFork);
 
-        var previousCommands: Array<Command> = this.getCommands(fromFork);
+        let previousCommands: Array<Command> = this.getCommands(fromFork);
 
         for (let command of previousCommands) {
             this.commandBus.executeCommand(domainFork, command, true);
@@ -68,9 +59,9 @@ export class WorkflowManager {
     }
 
     getCommands = (forkId: number): Array<Command> => {
-        var previousCommands: Array<Command> = [];
-        var fork = this.commandStore.findFork(forkId);
-        var lengthToCopy = fork.getCurrentLength();
+        let previousCommands: Array<Command> = [];
+        let fork = this.commandStore.findFork(forkId);
+        let lengthToCopy = fork.getCurrentLength();
         while (fork !== undefined) {
             previousCommands = fork.getArchive().slice(0, lengthToCopy).concat(previousCommands);
             lengthToCopy = fork.getStart();
@@ -88,9 +79,9 @@ export class WorkflowManager {
         this.domainStore.clear(forkId);
         // clear commands
         this.commandStore.clear(forkId);
-        //execute optimized stack
+        // execute optimized stack
         for (let command of optimizedStack)
-            this.commandBus.executeCommand(forkId, command);        
+            this.commandBus.executeCommand(forkId, command);
     }
 
     firstOrderMergeWorkflow = (forkId: number) => {
@@ -99,7 +90,7 @@ export class WorkflowManager {
     }
 
     lastOrderMergeWorkflow = (fromFork: CommandFork, toForkId: number) => {
-        console.log("TODO:  Optimize before fork!")
+        console.log('TODO:  Optimize before fork!');
         // domain stays intact
         // // get parent 
         // var fork = this.domainStore.getWorkflow(forkId);
@@ -113,13 +104,14 @@ export class WorkflowManager {
         var warnings: Array<string> = []; // todo make type warning???
         for (let command of commands) {
             try {
-                this.commandBus.executeCommand(toForkId, command)
+                this.commandBus.executeCommand(toForkId, command);
             }
             catch (e) {
                 warnings.push(e);
                 console.log(`Error:  ${e}`);
             }
         }
+        fromFork.disable();
         // --------------------------------------
         // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
         // we will prevent undo, then additional merges will only affect from that merge and on.

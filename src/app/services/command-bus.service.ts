@@ -15,7 +15,7 @@ export class CommandBus {
 
     executeCommand = (fork: number, command: Command, ignorePersist?: boolean): void => {
         if(!ignorePersist)
-            this.commandStore.store(fork, command);
+            this.commandStore.storeCommand(fork, command);
         command.execute(fork, this.queryBus, this.aggregateFactory);
     }
 

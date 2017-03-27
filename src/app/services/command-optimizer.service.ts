@@ -1,18 +1,10 @@
 import { Injectable } from '@angular/core';
-import { CommandStore } from "./command-store.service";
-import { CommandBus } from "./command-bus.service";
-import { DomainStore } from "./domain-store.service";
-import { DomainCache } from "./domain-cache.service";
-import { Workflow } from "../models/domain/workflow";
-import { CommandFork } from "../models/command-domain/commandFork";
-import { Command } from "../models/commands/command";
-import { MergeType } from "../models/domain/mergeType";
-import { CreateNewWorkflowAggregateCommand } from "../models/commands/createNewWorkflowAggregateCommand";
-import { UpdatePropertyCommand } from "../models/commands/updatePropertyCommand";
-import { MoveCommand } from "../models/commands/moveCommand";
-import { Dictionary } from "../models/collections/dictionary";
-import { AggregateCommandPartition } from "../models/command-domain/aggregateCommandPartition";
-import { CommandType } from "../models/command-domain/commandType";
+import { Command } from '../models/commands/command';
+import { CreateNewWorkflowAggregateCommand } from '../models/commands/createNewWorkflowAggregateCommand';
+import { UpdatePropertyCommand } from '../models/commands/updatePropertyCommand';
+import { Dictionary } from '../models/collections/dictionary';
+import { AggregateCommandPartition } from '../models/command-domain/aggregateCommandPartition';
+import { CommandType } from '../models/command-domain/commandType';
 
 @Injectable()
 export class CommandOptimizer {
@@ -38,8 +30,8 @@ export class CommandOptimizer {
         for (let i = 0; i < originalCommands.length; i++) {
             let command = originalCommands[i];
             var hash = command.aggregateHash();
-            if (partitions[hash] == undefined)
-                partitions[hash] = new AggregateCommandPartition(hash, i)
+            if (partitions[hash] === undefined)
+                partitions[hash] = new AggregateCommandPartition(hash, i);
 
             this.updatePartition(partitions[hash], command);
 

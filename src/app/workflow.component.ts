@@ -100,16 +100,17 @@ export class WorkflowComponent {
 
     merge = (forkId: number, type: MergeType) => {
         console.log(`Merge ${forkId} with type ${type}`);
-        var fork = this.commandBus.getFork(forkId);
+        let fork = this.commandBus.getFork(forkId);
         switch (type) {
             case MergeType.FirstOrder:
                 this.workflowManager.firstOrderMergeWorkflow(forkId);
+                break;
             case MergeType.LastOrder:
                 this.workflowManager.lastOrderMergeWorkflow(fork, fork.getParent().getId());
+                break;
             case MergeType.ByAggregate:
 
         }
-        //this.workflowManager.mergeWorkflow(forkFrom);
         this.mergeDialogDisplayed = false;
     }
 
@@ -118,15 +119,24 @@ export class WorkflowComponent {
     }
 
     getStackLengths = (forkId: number): Array<number> => {
-        var lengths: Array<number> = [];
-        var currentFork = this.queryBus.getRootObject(forkId);
+        let lengths: Array<number> = [];
+        let currentFork = this.queryBus.getRootObject(forkId);
 
-        while (currentFork != undefined) {
-            lengths.push(this.commandBus.getCommandArchive(currentFork.getForkId()).length);
+        lengths.push(this.commandBus.getCommandArchive(currentFork.getForkId()).length);
+
+        while (currentFork !== undefined) {
+            if (currentFork.getParent() !== undefined) {
+                lengths.push(this.commandBus.getFork(currentFork.getForkId()).getStart());
+            }
             currentFork = this.queryBus.getRootObject(currentFork.getParent());
         }
 
         return lengths.reverse();
+    }
+
+    wasMerged = (forkId: number): boolean => {
+        let fork = this.commandBus.getFork(forkId);
+        return fork.wasMerged();
     }
 
     optimize = (forkId: number) => {

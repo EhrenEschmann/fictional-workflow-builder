@@ -1,11 +1,11 @@
-import { Command } from "../commands/command";
-import { CreateNewWorkflowAggregateCommand } from "../commands/createNewWorkflowAggregateCommand";
-import { MoveWorkflowAggregateToRootCommand } from "../commands/moveWorkflowAggregateToRootCommand";
-import { MoveWorkflowAggregateToTargetCommand } from "../commands/moveWorkflowAggregateToTargetCommand";
-import { MoveCommand } from "../commands/moveCommand";
-import { CommandType } from "../command-domain/commandType";
-import { Dictionary } from "../collections/dictionary";
-import { UpdatePropertyCommand } from "../commands/updatePropertyCommand";
+import { Command } from '../commands/command';
+import { CreateNewWorkflowAggregateCommand } from '../commands/createNewWorkflowAggregateCommand';
+import { MoveWorkflowAggregateToRootCommand } from '../commands/moveWorkflowAggregateToRootCommand';
+import { MoveWorkflowAggregateToTargetCommand } from '../commands/moveWorkflowAggregateToTargetCommand';
+import { MoveCommand } from '../commands/moveCommand';
+import { CommandType } from '../command-domain/commandType';
+import { Dictionary } from '../collections/dictionary';
+import { UpdatePropertyCommand } from '../commands/updatePropertyCommand';
 
 export class AggregateCommandPartition {
 
@@ -66,7 +66,7 @@ export class AggregateCommandPartition {
         if (this.createCommand)
             commands.push(this.createCommand);
         if (this.moveCommands.length > 0)
-            commands.push(this.moveCommands[this.moveCommands.length - 1])
+            commands.push(this.moveCommands[this.moveCommands.length - 1]);
         if (this.updateCommands.length > 0)
             commands = commands.concat(this.updateCommands);
         if (this.deleteCommand)

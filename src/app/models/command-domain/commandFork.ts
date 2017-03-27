@@ -1,27 +1,36 @@
-import { CommandStack } from "./commandStack";
-import { Command } from "../commands/command";
+import { CommandStack } from './commandStack';
+import { Command } from '../commands/command';
 
 export class CommandFork {
-    
+
     private commands: CommandStack;
-
     private childrenForks: Array<CommandFork>;
-
     private undoLimit: number = 0;
+    private merged: boolean;
 
-    constructor(private readonly id: number,
+    constructor(
+        private readonly id: number,
         private start: number,
-        private parentFork?: CommandFork) {
-
+        private parentFork?: CommandFork
+    ) {
         this.commands = new CommandStack();
         this.childrenForks = [];
+        this.merged = false;
     }
 
-    getId = () :number => {
+    wasMerged = (): boolean => {
+        return this.merged;
+    }
+
+    disable = (): void => {
+        this.merged = true; 
+    }
+
+    getId = () : number => {
         return this.id;
     }
-    
-    addChild = (fork : CommandFork):void => {
+
+    addChild = (fork : CommandFork): void => {
         this.childrenForks.push(fork);
     }
 

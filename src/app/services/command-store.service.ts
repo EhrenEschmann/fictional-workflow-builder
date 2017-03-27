@@ -53,7 +53,7 @@ export class CommandStore {
     return newId;
   }
 
-  store = (fork: number, command: Command): void => {
+  storeCommand = (fork: number, command: Command): void => {
     this.findFork(fork).storeCommand(command);
   }
 
