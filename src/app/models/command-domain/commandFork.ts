@@ -77,4 +77,8 @@ export class CommandFork {
     getArchive = (): Array<Command> => {
         return this.commands.getArchive();
     }
+
+    clearStack = (): void => {
+        this.commands.clear();
+    }
 }

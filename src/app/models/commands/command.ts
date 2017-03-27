@@ -1,5 +1,6 @@
 import { QueryBus } from "../../services/query-bus.service";
 import { AggregateFactory } from "../../services/aggregate-factory.service";
+import { CommandType } from "../command-domain/commandType";
 
 export abstract class Command {
   constructor() { }
@@ -7,7 +8,7 @@ export abstract class Command {
   abstract undo: (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
   title: string = "Command Executed";
 
-  generateHash() {
+  generateHash() { // TODO: Ignore certain id's (element could be the same with a different hash)
     var hash = 0;
     var string = JSON.stringify(this.toJSON())
     for (var i = 0; i < string.length; i++) {
@@ -17,6 +18,10 @@ export abstract class Command {
     }
     return hash;
   }
+
+  abstract type: CommandType;
+
+  abstract aggregateHash: () => string;
 
   //Override toJSON method on commands for JSON.Stringify()
   abstract toJSON(): Object;

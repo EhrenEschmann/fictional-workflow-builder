@@ -80,4 +80,8 @@ export class CommandStore {
   getArchiveTitles = (fork: number): Array<string> => {
     return this.getArchive(fork).map((command: Command) => command.title);
   }
+
+  clear = (forkId: number): void => {
+    this.workflow.clearStack();
+  }
 }

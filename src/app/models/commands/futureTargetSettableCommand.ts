@@ -3,10 +3,5 @@ import { AggregateFactory } from "../../services/aggregate-factory.service";
 import { Command } from "./command";
 
 export abstract class FutureTargetSettableCommand extends Command {
-
-    targetHash: string;
-
-    setTarget = (hash: string) => {
-        this.targetHash = hash;   
-    }
+    abstract setTarget: (hash: string) => void;
 }

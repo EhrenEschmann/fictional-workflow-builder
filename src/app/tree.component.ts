@@ -27,11 +27,11 @@ export class TreeComponent {
     updateProperty(fork: number, aggregate: WorkflowAggregate, propertyKey: string, newValue: string) {
         console.log(fork, aggregate, propertyKey, newValue);
         var command = new UpdatePropertyCommand(aggregate.getHash(), propertyKey, newValue);
-        this.commandBus.executeCommand(fork, command, true);
+        this.commandBus.executeCommand(fork, command);
     }
 
     deleteAggregate = (fork: number, aggregateHash: string): void => {
         var command = new DeleteWorkflowAggregateCommand(aggregateHash);
-        this.commandBus.executeCommand(fork, command, true);
+        this.commandBus.executeCommand(fork, command);
     }
 }

@@ -38,4 +38,11 @@ export class DomainStore {
     isLoaded = (): boolean => {
         return !(this.workflowForks == undefined);
     }
+
+    // TODO:  Dont HAVE to do this; just display for good measure.
+    clear = (forkId: number): void => {
+        var name = this.workflowForks[forkId].getName();
+        var forkFrom = this.workflowForks[forkId].getParent();
+        this.workflowForks[forkId] = new Workflow(forkId, forkFrom, name);
+    }
 }

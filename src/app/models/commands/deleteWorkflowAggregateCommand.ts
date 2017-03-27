@@ -4,10 +4,13 @@ import { QueryBus } from '../../services/query-bus.service';
 import { AggregateFactory } from '../../services/aggregate-factory.service';
 import { TypeStore } from '../../services/type-store.service';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
+import { CommandType } from "../command-domain/commandType";
 
 export class DeleteWorkflowAggregateCommand extends Command {
 
-    constructor(public targetHash: string) { super(); }
+    constructor(
+        public targetHash: string
+    ) { super(); }
 
     private originalIndex: number;
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
@@ -21,6 +24,12 @@ export class DeleteWorkflowAggregateCommand extends Command {
     undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
         var aggregate = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
         aggregate.parent.splice(this.originalIndex, 0, aggregate);
+    }
+
+    type = CommandType.Delete;
+
+    aggregateHash = (): string => {
+        return this.targetHash;
     }
 
     toJSON() {

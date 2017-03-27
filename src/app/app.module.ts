@@ -17,22 +17,26 @@ import { CommandBus } from './services/command-bus.service';
 import { ViewState } from './services/view-state.service';
 import { AggregateFactory } from './services/aggregate-factory.service';
 import { TypeStore } from './services/type-store.service';
-import { ValuesPipe } from './pipes/valuesPipe.pipe'
-import { PropertyEditorComponent } from './property-editor.component'
+import { CommandOptimizer } from './services/command-optimizer.service';
+import { ValuesPipe } from './pipes/valuesPipe.pipe';
+import { PropertyEditorComponent } from './property-editor.component';
 //import { UUID } from 'angular2-uuid';
-import "./models/domain/workflow-aggregates/executeCompiledBinaryWorkflowAggregate";
-import "./models/domain/workflow-aggregates/postRestApiWorkflowAggregate";
-import "./models/domain/workflow-aggregates/sendEmailWorkflowAggregate";
+import './models/domain/workflow-aggregates/executeCompiledBinaryWorkflowAggregate';
+import './models/domain/workflow-aggregates/postRestApiWorkflowAggregate';
+import './models/domain/workflow-aggregates/sendEmailWorkflowAggregate';
 
-import "./models/commands/addWorkflowAggregateToTargetCommand";
-import "./models/commands/addWorkflowAggregateToRootCommand";
-import "./models/commands/createNewWorkflowAggregateCommand";
-import "./models/commands/updatePropertyCommand";
+import './models/commands/moveWorkflowAggregateToTargetCommand';
+import './models/commands/moveWorkflowAggregateToRootCommand';
+import './models/commands/createNewWorkflowAggregateCommand';
+import './models/commands/updatePropertyCommand';
 
 @NgModule({
   imports: [BrowserModule, FormsModule, DialogModule],
-  declarations: [AppComponent, WorkflowComponent, TreeComponent, TreeNodeComponent, PropertyEditorComponent, ValuesPipe],
+  declarations: [AppComponent, WorkflowComponent, TreeComponent, TreeNodeComponent,
+                PropertyEditorComponent, ValuesPipe],
   bootstrap: [AppComponent],
-  providers: [QueryBus, HashGenerator, WindowRef, WorkflowManager, DomainStore, DomainCache, CommandStore, CommandBus, AggregateFactory, ViewState, TypeStore]
+  providers: [QueryBus, HashGenerator, WindowRef, WorkflowManager, DomainStore,
+              DomainCache, CommandStore, CommandBus, AggregateFactory, ViewState,
+              TypeStore, CommandOptimizer]
 })
 export class AppModule { }

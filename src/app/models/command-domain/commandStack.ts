@@ -2,18 +2,20 @@ import { Command } from "../commands/command";
 
 export class CommandStack {
 
+    private nullRoot: LinkedNode;
     private location: LinkedNode;
 
-    constructor() { 
-        var nullRoot = new LinkedNode();
-        this.location = nullRoot;
+
+    constructor() {
+        this.nullRoot = new LinkedNode();
+        this.location = this.nullRoot;
     }
 
     push = (command: Command): void => {
         var node = new LinkedNode(command);
         node.previous = this.location;
 
-        if(this.location)
+        if (this.location)
             this.location.next = node;
 
         this.location = node;
@@ -59,17 +61,21 @@ export class CommandStack {
         }
         return archive;
     }
+
+    clear = (): void => {
+        this.location = this.nullRoot;
+        this.location.next = undefined;
+    }
 }
 
 class LinkedNode {
+
+    previous: LinkedNode;
+    next: LinkedNode;
 
     constructor(private readonly command?: Command) { }
 
     getCommand = () => {
         return this.command;
     }
-
-    previous: LinkedNode;
-
-    next: LinkedNode;
 }

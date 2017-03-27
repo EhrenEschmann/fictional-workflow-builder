@@ -7,6 +7,13 @@ import { Workflow } from "../models/domain/workflow";
 import { CommandFork } from "../models/command-domain/commandFork";
 import { Command } from "../models/commands/command";
 import { MergeType } from "../models/domain/mergeType";
+import { CreateNewWorkflowAggregateCommand } from "../models/commands/createNewWorkflowAggregateCommand";
+import { UpdatePropertyCommand } from "../models/commands/updatePropertyCommand";
+import { MoveCommand } from "../models/commands/moveCommand";
+import { Dictionary } from "../models/collections/dictionary";
+import { AggregateCommandPartition } from "../models/command-domain/aggregateCommandPartition";
+import { CommandType } from "../models/command-domain/commandType";
+import { CommandOptimizer } from "./command-optimizer.service";
 
 // TODO:  The public contract should all exist on the command or querybus (commandBus.initialize(), queryBus.initialize())
 @Injectable()
@@ -15,11 +22,12 @@ export class WorkflowManager {
     constructor(private readonly commandStore: CommandStore,
         private readonly commandBus: CommandBus,
         private readonly domainStore: DomainStore,
-        private readonly domainCache: DomainCache
+        private readonly domainCache: DomainCache,
+        private readonly commandOptimizer: CommandOptimizer
     ) { }
 
     createWorkflow = (name: string) => {
-        name = "TODO_temp"
+        name = "TODO_temp";
         this.domainStore.create(name);
         this.commandStore.startMainLine();
         this.domainCache.createCache(0);
@@ -31,7 +39,7 @@ export class WorkflowManager {
 
         // TODO: hardcode from app.component for now.
 
-        //var 
+        // var 
     }
 
     canUndo = (forkId: number): boolean => {
@@ -55,7 +63,7 @@ export class WorkflowManager {
         var previousCommands: Array<Command> = this.getCommands(fromFork);
 
         for (let command of previousCommands) {
-            this.commandBus.executeCommand(domainFork, command, false);
+            this.commandBus.executeCommand(domainFork, command, true);
         }
     }
 
@@ -73,7 +81,16 @@ export class WorkflowManager {
     }
 
     optimize = (forkId: number): void => {
-        console.log("TODO:  Optimize before fork!")
+        var originalCommands = this.commandStore.getArchive(forkId);
+        var optimizedStack = this.commandOptimizer.optimize(originalCommands);
+
+        // clear domain
+        this.domainStore.clear(forkId);
+        // clear commands
+        this.commandStore.clear(forkId);
+        //execute optimized stack
+        for (let command of optimizedStack)
+            this.commandBus.executeCommand(forkId, command);        
     }
 
     firstOrderMergeWorkflow = (forkId: number) => {
@@ -82,6 +99,7 @@ export class WorkflowManager {
     }
 
     lastOrderMergeWorkflow = (fromFork: CommandFork, toForkId: number) => {
+        console.log("TODO:  Optimize before fork!")
         // domain stays intact
         // // get parent 
         // var fork = this.domainStore.getWorkflow(forkId);
@@ -95,17 +113,17 @@ export class WorkflowManager {
         var warnings: Array<string> = []; // todo make type warning???
         for (let command of commands) {
             try {
-                this.commandBus.executeCommand(toForkId, command, true)
+                this.commandBus.executeCommand(toForkId, command)
             }
             catch (e) {
                 warnings.push(e);
                 console.log(`Error:  ${e}`);
             }
         }
-        //--------------------------------------
+        // --------------------------------------
         // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
         // we will prevent undo, then additional merges will only affect from that merge and on.
-        //commandFork.setUndoLimit();
+        // commandFork.setUndoLimit();
         // TODO: 1. assign children forks as children of parent.
         //   --> Unfortunately, children are no longer the same since their parent is changed,  reinitialize the fork ? 
         //            - no, leave it. we can store the start so we can choose to ignore all the changes after the start
@@ -113,7 +131,7 @@ export class WorkflowManager {
         //            - force a merge up after this completes, that will fix our problem.
         //            - prevent merges if children exist???
         // TODO: 2. delete (nullify) this fork
-        //--------------------------------------
+        // --------------------------------------
     }
 
     isLoaded = (): boolean => {

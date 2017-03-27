@@ -2,8 +2,8 @@ import { Component, Input } from '@angular/core';
 import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate';
 import { HashGenerator } from './services/hash-generator.service';
 import { CreateNewWorkflowAggregateCommand } from './models/commands/createNewWorkflowAggregateCommand';
-import { AddWorkflowAggregateToTargetCommand } from './models/commands/addWorkflowAggregateToTargetCommand';
-import { AddWorkflowAggregateToRootCommand } from './models/commands/addWorkflowAggregateToRootCommand';
+import { MoveWorkflowAggregateToTargetCommand } from './models/commands/moveWorkflowAggregateToTargetCommand';
+import { MoveWorkflowAggregateToRootCommand } from './models/commands/moveWorkflowAggregateToRootCommand';
 import { WorkflowManager } from './services/workflow-manager.service';
 import { CommandBus } from './services/command-bus.service';
 import { DomainStore } from './services/domain-store.service';
@@ -68,12 +68,12 @@ export class WorkflowComponent {
         aggregateType = "PostRestApiWorkflowAggregate";
 
         var createCommand = new CreateNewWorkflowAggregateCommand(aggregateType, this.hashGenerator.createHash());
-        var addCommand;
-        if (parent && event)
-            addCommand = new AddWorkflowAggregateToTargetCommand(parent.getHash(), event, createCommand);
-        else
-            addCommand = new AddWorkflowAggregateToRootCommand(createCommand);
-        this.commandBus.executeCommand(fork, addCommand, true);
+        var moveCommand = (parent && event)
+            ? new MoveWorkflowAggregateToTargetCommand(parent.getHash(), event)
+            : new MoveWorkflowAggregateToRootCommand();
+
+        createCommand.updateCommands.push(moveCommand);
+        this.commandBus.executeCommand(fork, createCommand);
     }
 
     getRootAggregates = (): Array<WorkflowAggregate> => {
@@ -105,7 +105,7 @@ export class WorkflowComponent {
             case MergeType.FirstOrder:
                 this.workflowManager.firstOrderMergeWorkflow(forkId);
             case MergeType.LastOrder:
-                this.workflowManager.lastOrderMergeWorkflow(fork, fork.getParent().getId() );
+                this.workflowManager.lastOrderMergeWorkflow(fork, fork.getParent().getId());
             case MergeType.ByAggregate:
 
         }
@@ -114,10 +114,10 @@ export class WorkflowComponent {
     }
 
     getCommandTitles = (forkId: number): Array<string> => {
-        return this.workflowManager.getCommands(forkId).map((c:Command) => c.title);
+        return this.workflowManager.getCommands(forkId).map((c: Command) => c.title);
     }
 
-    getStackLengths =(forkId:number): Array<number> => {
+    getStackLengths = (forkId: number): Array<number> => {
         var lengths: Array<number> = [];
         var currentFork = this.queryBus.getRootObject(forkId);
 
@@ -127,5 +127,9 @@ export class WorkflowComponent {
         }
 
         return lengths.reverse();
+    }
+
+    optimize = (forkId: number) => {
+        this.workflowManager.optimize(forkId);
     }
 }

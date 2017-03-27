@@ -2,7 +2,6 @@ import { Dictionary } from '../../collections/dictionary';
 import { AggregateRoot } from '../aggregateRoot';
 import { Property } from '../property';
 
-
 export abstract class WorkflowAggregate implements AggregateRoot {
 
     constructor(private readonly hash: string) { }
