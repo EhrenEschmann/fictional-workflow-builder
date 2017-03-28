@@ -8,7 +8,7 @@ import { CommandType } from '../models/command-domain/commandType';
 
 @Injectable()
 export class CommandOptimizer {
-       private updatePartition(partition: AggregateCommandPartition, command: Command): void {
+    private updatePartition(partition: AggregateCommandPartition, command: Command): void {
         switch (command.type) {
             case CommandType.Create:
                 partition.addCreateCommand(command as CreateNewWorkflowAggregateCommand);
@@ -26,17 +26,17 @@ export class CommandOptimizer {
     }
 
     private partition(originalCommands: Array<Command>): Dictionary<AggregateCommandPartition> {
-        var partitions: Dictionary<AggregateCommandPartition> = {};
+        let partitions: Dictionary<AggregateCommandPartition> = {};
         for (let i = 0; i < originalCommands.length; i++) {
             let command = originalCommands[i];
-            var hash = command.aggregateHash();
+            let hash = command.aggregateHash();
             if (partitions[hash] === undefined)
                 partitions[hash] = new AggregateCommandPartition(hash, i);
 
             this.updatePartition(partitions[hash], command);
 
             if (command instanceof CreateNewWorkflowAggregateCommand) {
-                var nestedCommands = (command as CreateNewWorkflowAggregateCommand).updateCommands;
+                let nestedCommands = (command as CreateNewWorkflowAggregateCommand).updateCommands;
 
                 for (let nestedCommand of nestedCommands)
                     this.updatePartition(partitions[hash], nestedCommand);
@@ -48,9 +48,15 @@ export class CommandOptimizer {
     }
 
     private pruneDeletedDependencies(partitions: Dictionary<AggregateCommandPartition>): Dictionary<AggregateCommandPartition> {
-        var prunedPartitions: Dictionary<AggregateCommandPartition> = {};
+        let prunedPartitions: Dictionary<AggregateCommandPartition> = {};
         for (let hash in partitions) {
-            if (!partitions[hash].deleted())
+            if (partitions[hash].deleted()) {
+                if (!partitions[hash].created()) {
+                    partitions[hash].clearUpdates();
+                    partitions[hash].clearMoves();
+                    prunedPartitions[hash] = partitions[hash];
+                }
+            } else if (!partitions[hash].deleted())
                 if (partitions[hash].getParentAggregateHash() === undefined) // signals root level aggregateCommandPartition
                     prunedPartitions[hash] = partitions[hash];
                 else if (prunedPartitions[partitions[hash].getParentAggregateHash()])
@@ -60,12 +66,12 @@ export class CommandOptimizer {
     }
 
     optimize = (originalCommands: Array<Command>): Array<Command> => {
-        var partitions: Dictionary<AggregateCommandPartition> = this.partition(originalCommands);
+        let partitions: Dictionary<AggregateCommandPartition> = this.partition(originalCommands);
         partitions = this.pruneDeletedDependencies(partitions);
         for (let hash in partitions) {
             partitions[hash].consolidateUpdates();
         }
-        var optimizedStack: Array<Command> = [];
+        let optimizedStack: Array<Command> = [];
         for (let hash in partitions) {
             optimizedStack = optimizedStack.concat(partitions[hash].getOrderedCommands());
         }

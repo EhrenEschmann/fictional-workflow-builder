@@ -1,9 +1,5 @@
 import { Command } from '../commands/command';
 import { CreateNewWorkflowAggregateCommand } from '../commands/createNewWorkflowAggregateCommand';
-import { MoveWorkflowAggregateToRootCommand } from '../commands/moveWorkflowAggregateToRootCommand';
-import { MoveWorkflowAggregateToTargetCommand } from '../commands/moveWorkflowAggregateToTargetCommand';
-import { MoveCommand } from '../commands/moveCommand';
-import { CommandType } from '../command-domain/commandType';
 import { Dictionary } from '../collections/dictionary';
 import { UpdatePropertyCommand } from '../commands/updatePropertyCommand';
 
@@ -24,8 +20,13 @@ export class AggregateCommandPartition {
     }
 
     getParentAggregateHash = (): string => {
-        var lastMove = this.moveCommands[this.moveCommands.length - 1] as any;
+        let lastMove = this.moveCommands[this.moveCommands.length - 1] as any;
+        if (!lastMove) return undefined;
         return lastMove.getNewParentHash();
+    }
+
+    created = () => {
+        return !!this.createCommand;
     }
 
     deleted = () => {
@@ -48,13 +49,21 @@ export class AggregateCommandPartition {
         this.deleteCommand = command;
     }
 
+    clearUpdates = (): void => {
+        this.updateCommands = [];
+    }
+
+    clearMoves = (): void => {
+        this.moveCommands = [];
+    }
+
     consolidateUpdates = (): void => {
-        var lookup: Dictionary<UpdatePropertyCommand> = {};
+        let lookup: Dictionary<UpdatePropertyCommand> = {};
         for (let command of this.updateCommands) {
             lookup[command.propertyKey] = command;
         }
 
-        var consolidated: Array<UpdatePropertyCommand> = [];
+        let consolidated: Array<UpdatePropertyCommand> = [];
         for (let key in lookup) {
             consolidated.push(lookup[key]);
         }
@@ -62,7 +71,7 @@ export class AggregateCommandPartition {
     }
 
     getOrderedCommands = (): Array<Command> => {
-        var commands: Array<Command> = [];
+        let commands: Array<Command> = [];
         if (this.createCommand)
             commands.push(this.createCommand);
         if (this.moveCommands.length > 0)

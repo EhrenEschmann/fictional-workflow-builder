@@ -1,10 +1,9 @@
-import { Injectable } from "@angular/core";
-import { QueryBus } from "./query-bus.service";
-import { CommandStore } from "./command-store.service";
-import { AggregateFactory } from "./aggregate-factory.service";
-import { Command } from "../models/commands/command";
-import { Dictionary } from "../models/collections/dictionary";
-import { CommandFork } from "../models/command-domain/commandFork";
+import { Injectable } from '@angular/core';
+import { QueryBus } from './query-bus.service';
+import { CommandStore } from './command-store.service';
+import { AggregateFactory } from './aggregate-factory.service';
+import { Command } from '../models/commands/command';
+import { CommandFork } from '../models/command-domain/commandFork';
 
 @Injectable()
 export class CommandBus {
@@ -14,9 +13,9 @@ export class CommandBus {
         private readonly queryBus: QueryBus) { }
 
     executeCommand = (fork: number, command: Command, ignorePersist?: boolean): void => {
-        if(!ignorePersist)
-            this.commandStore.storeCommand(fork, command);
         command.execute(fork, this.queryBus, this.aggregateFactory);
+        if (!ignorePersist)
+            this.commandStore.storeCommand(fork, command);
     }
 
     undoCommand = (fork: number, count: number): void => {

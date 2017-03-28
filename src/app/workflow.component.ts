@@ -6,22 +6,21 @@ import { MoveWorkflowAggregateToTargetCommand } from './models/commands/moveWork
 import { MoveWorkflowAggregateToRootCommand } from './models/commands/moveWorkflowAggregateToRootCommand';
 import { WorkflowManager } from './services/workflow-manager.service';
 import { CommandBus } from './services/command-bus.service';
-import { DomainStore } from './services/domain-store.service';
 import { QueryBus } from './services/query-bus.service';
 import { ViewState } from './services/view-state.service';
-import { Workflow } from "./models/domain/workflow";
-import { MergeType } from "./models/domain/mergeType";
-import { MergeTypeAware } from "./decorators/mergeTypeAware.decorator";
-import { Command } from "./models/commands/command";
+import { Workflow } from './models/domain/workflow';
+import { MergeType } from './models/domain/mergeType';
+import { MergeTypeAware } from './decorators/mergeTypeAware.decorator';
+import { Command } from './models/commands/command';
 
 @Component({
-    selector: "fwb-workflow",
-    templateUrl: "./app/workflow.component.html"
+    selector: 'fwb-workflow',
+    templateUrl: './app/workflow.component.html'
 })
 @MergeTypeAware
 export class WorkflowComponent {
     @Input() workflow: Workflow;
-    //aggregates: Array<WorkflowAggregate>;
+    // aggregates: Array<WorkflowAggregate>;
 
     private mergeDialogDisplayed: boolean = false;
 
@@ -64,11 +63,11 @@ export class WorkflowComponent {
     }
 
     addAggregate = (fork: number, parent: WorkflowAggregate, event: string, aggregateType: string): void => {
-        //var selectedAggregate = this.viewState.selectedAggregate;
-        aggregateType = "PostRestApiWorkflowAggregate";
+        // var selectedAggregate = this.viewState.selectedAggregate;
+        aggregateType = 'PostRestApiWorkflowAggregate';
 
-        var createCommand = new CreateNewWorkflowAggregateCommand(aggregateType, this.hashGenerator.createHash());
-        var moveCommand = (parent && event)
+        let createCommand = new CreateNewWorkflowAggregateCommand(aggregateType, this.hashGenerator.createHash());
+        let moveCommand = (parent && event)
             ? new MoveWorkflowAggregateToTargetCommand(parent.getHash(), event)
             : new MoveWorkflowAggregateToRootCommand();
 
@@ -77,7 +76,7 @@ export class WorkflowComponent {
     }
 
     getRootAggregates = (): Array<WorkflowAggregate> => {
-        var forkId = this.getForkNum();
+        let forkId = this.getForkNum();
         if (this.queryBus.getRootObject(forkId))
             return this.queryBus.getRootObject(forkId).rootAggregate();
     }
@@ -134,10 +133,10 @@ export class WorkflowComponent {
         return lengths.reverse();
     }
 
-    wasMerged = (forkId: number): boolean => {
-        let fork = this.commandBus.getFork(forkId);
-        return fork.wasMerged();
-    }
+    // wasMerged = (forkId: number): boolean => {
+    //     let fork = this.commandBus.getFork(forkId);
+    //     return fork.wasMerged();
+    // }
 
     optimize = (forkId: number) => {
         this.workflowManager.optimize(forkId);

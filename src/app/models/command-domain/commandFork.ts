@@ -6,7 +6,7 @@ export class CommandFork {
     private commands: CommandStack;
     private childrenForks: Array<CommandFork>;
     private undoLimit: number = 0;
-    private merged: boolean;
+    // private merged: boolean;
 
     constructor(
         private readonly id: number,
@@ -15,22 +15,22 @@ export class CommandFork {
     ) {
         this.commands = new CommandStack();
         this.childrenForks = [];
-        this.merged = false;
+        // this.merged = false;
     }
 
-    wasMerged = (): boolean => {
-        return this.merged;
-    }
+    // wasMerged = (): boolean => {
+    //     return this.merged;
+    // }
 
-    disable = (): void => {
-        this.merged = true; 
-    }
+    // disable = (): void => {
+    //     this.merged = true;
+    // }
 
-    getId = () : number => {
+    getId = (): number => {
         return this.id;
     }
 
-    addChild = (fork : CommandFork): void => {
+    addChild = (fork: CommandFork): void => {
         this.childrenForks.push(fork);
     }
 

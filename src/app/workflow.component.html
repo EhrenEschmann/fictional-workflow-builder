@@ -10,27 +10,25 @@
     </p-footer>
 </p-dialog>
 <hr />
-<div [attr.disabled]="wasMerged(getForkNum()) ? true : null" [ngStyle]="{'background-color' : wasMerged(getForkNum()) ? '#696969' : '#ffffff' }">
-    <span>{{getForkNum()}}</span>
-    <button (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())">Undo</button>
-    <button (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())">Redo</button>
-    <button (click)="fork(getForkNum())">Fork</button>
-    <button (click)="mergeDialogDisplayed = true" [disabled]="getParentId(getForkNum()) == undefined"> Merge Up</button>
-    <button (click)="TODO" [disabled]="getChildrenForks().length == 0">Merge Down</button>
-    <button (click)="optimize(getForkNum())"> optimize</button>
-    <button (click)="addAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])">Add Aggregate</button>
-    <!--<select>
+<span>{{getForkNum()}}</span>
+<button (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())">Undo</button>
+<button (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())">Redo</button>
+<button (click)="fork(getForkNum())">Fork</button>
+<button (click)="mergeDialogDisplayed = true" [disabled]="getParentId(getForkNum()) == undefined"> Merge Up</button>
+<button (click)="TODO" [disabled]="getChildrenForks().length == 0">Merge Down</button>
+<button (click)="optimize(getForkNum())"> optimize</button>
+<button (click)="addAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])">Add Aggregate</button>
+<!--<select>
   <option *ngFor="let commandTitle of getCommandTitles(getForkNum())" value="{{commandTitle}}">
      {{commandTitle}}
   </option>
 </select>-->
-    <span>{{getStackLengths(getForkNum()).join(' + ')}}</span>
+<span>{{getStackLengths(getForkNum()).join(' + ')}}</span>
 
-    <fwb-tree [aggregates]="getRootAggregates()" [fork]="getForkNum()">
-    </fwb-tree>
+<fwb-tree [aggregates]="getRootAggregates()" [fork]="getForkNum()">
+</fwb-tree>
 
-    <div style="margin-left: 10px; border-left: 5px solid deeppink">
-        <fwb-workflow *ngFor="let fork of getChildrenForks()" [workflow]="fork">
-        </fwb-workflow>
-    </div>
+<div style="margin-left: 10px; border-left: 5px solid deeppink">
+    <fwb-workflow *ngFor="let fork of getChildrenForks()" [workflow]="fork">
+    </fwb-workflow>
 </div>

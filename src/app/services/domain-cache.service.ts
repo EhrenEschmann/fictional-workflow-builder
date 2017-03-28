@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { AggregateRoot } from "../models/domain/aggregateRoot";
-import { Dictionary } from "../models/collections/dictionary";
-import { HashGenerator } from "./hash-generator.service";
+import { AggregateRoot } from '../models/domain/aggregateRoot';
+import { Dictionary } from '../models/collections/dictionary';
+import { HashGenerator } from './hash-generator.service';
 
 @Injectable()
 export class DomainCache {

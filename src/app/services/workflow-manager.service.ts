@@ -54,7 +54,11 @@ export class WorkflowManager {
         let previousCommands: Array<Command> = this.getCommands(fromFork);
 
         for (let command of previousCommands) {
-            this.commandBus.executeCommand(domainFork, command, true);
+            try {
+                this.commandBus.executeCommand(domainFork, command, true);
+            } catch (e) {
+                console.log(`Error:  ${e}`);
+            }
         }
     }
 
@@ -72,16 +76,55 @@ export class WorkflowManager {
     }
 
     optimize = (forkId: number): void => {
-        var originalCommands = this.commandStore.getArchive(forkId);
-        var optimizedStack = this.commandOptimizer.optimize(originalCommands);
+        // restore to previous state
+        let originalCommands = this.commandStore.getArchive(forkId);
+        for (let originalCommand of originalCommands) {
+            try {
+                this.commandBus.undoCommand(forkId, 1); // go 1 at a time in case there are errors.
+            } catch (e) {
+                console.log(`Error:  ${e}`);
+            }
+        }
 
-        // clear domain
-        this.domainStore.clear(forkId);
-        // clear commands
-        this.commandStore.clear(forkId);
-        // execute optimized stack
-        for (let command of optimizedStack)
-            this.commandBus.executeCommand(forkId, command);
+        let optimizedStack = this.commandOptimizer.optimize(originalCommands);
+        // TODO:  This is not needed, the state will be identical
+        // TODO:  This will work for the main branch, but not the children, those commands must be gathered.
+        // TODO:  We will have to go back and get all previous commands, which might not be possible if a parent was optimized.
+
+        // // // clear domain
+        // this.domainStore.clear(forkId);
+        // // // clear commands
+        // this.commandStore.clear(forkId);
+
+        // // TODO: Execute parents Stack
+        // // 0. find current and parent
+        // let current = this.commandStore.findFork(forkId);
+        // let parent = current.getParent();
+        // // 1. Get Commands
+        // let previousCommands: Array<Command> = [];
+        // while (parent !== undefined) {
+        //     previousCommands = parent.getArchive().slice(0, current.getStart()).concat(previousCommands);
+        //     current = parent;
+        //     parent = current.getParent();
+        // }
+
+        // // previousCommands = previousCommands.concat(optimizedStack);
+        // // execute optimized stack
+        // // These are safe!
+        // for (let command of previousCommands)
+        //     this.commandBus.executeCommand(forkId, command, true);
+
+        // These are potentially volatile
+        let warnings: Array<string> = []; // todo make type warning???
+        for (let command of optimizedStack) {
+            try {
+                this.commandBus.executeCommand(forkId, command);
+            } catch (e) {
+                warnings.push(e);
+                console.log(`Error:  ${e}`);
+            }
+        }
+        console.log('completed with warnings: ' + warnings);
     }
 
     firstOrderMergeWorkflow = (forkId: number) => {
@@ -98,20 +141,20 @@ export class WorkflowManager {
         // //      get fork 
         // var commandFork = this.commandStore.findFork(forkId);
         // get the forks stack
-        var lengthToCopy = fromFork.getUndoLength();
-        var commands = fromFork.getArchive().slice(0, lengthToCopy);
+        // let lengthToCopy = fromFork.getUndoLength();
+        let commands = fromFork.getArchive();   // .slice(0, lengthToCopy);
         // apply forked commands on parent as-is, Track errors with try-catch
-        var warnings: Array<string> = []; // todo make type warning???
+        let warnings: Array<string> = []; // todo make type warning???
         for (let command of commands) {
             try {
                 this.commandBus.executeCommand(toForkId, command);
-            }
-            catch (e) {
+            } catch (e) {
                 warnings.push(e);
                 console.log(`Error:  ${e}`);
             }
         }
-        fromFork.disable();
+        // TODO:  Prevent Undo gathered
+        fromFork.setUndoLimit();
         // --------------------------------------
         // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
         // we will prevent undo, then additional merges will only affect from that merge and on.
@@ -129,5 +172,4 @@ export class WorkflowManager {
     isLoaded = (): boolean => {
         return this.domainStore.isLoaded();
     }
-
 }

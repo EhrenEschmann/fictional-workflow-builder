@@ -1,4 +1,4 @@
-import { Command } from "../commands/command";
+import { Command } from '../commands/command';
 
 export class CommandStack {
 
@@ -12,7 +12,7 @@ export class CommandStack {
     }
 
     push = (command: Command): void => {
-        var node = new LinkedNode(command);
+        let node = new LinkedNode(command);
         node.previous = this.location;
 
         if (this.location)
@@ -27,15 +27,15 @@ export class CommandStack {
     }
 
     pop = (): Command => {
-        var command = this.location.getCommand();
+        let command = this.location.getCommand();
         this.location = this.location.previous;
         return command;
     }
 
     getLength = (): number => {
-        var temp: LinkedNode = this.location;
-        var count = 0;
-        while (temp.getCommand() != undefined) {
+        let temp: LinkedNode = this.location;
+        let count = 0;
+        while (temp.getCommand() !== undefined) {
             temp = temp.previous;
             count++;
         }
@@ -43,9 +43,9 @@ export class CommandStack {
     }
 
     getLocation = (): number => {
-        var temp: LinkedNode = this.location;
-        var count = -1;
-        while (temp != undefined) {
+        let temp: LinkedNode = this.location;
+        let count = -1;
+        while (temp !== undefined) {
             temp = temp.next;
             count++;
         }
@@ -53,9 +53,9 @@ export class CommandStack {
     }
 
     getArchive = (): Array<Command> => {
-        var temp: LinkedNode = this.location;
-        var archive: Array<Command> = [];
-        while (temp.getCommand() != undefined) {
+        let temp: LinkedNode = this.location;
+        let archive: Array<Command> = [];
+        while (temp.getCommand() !== undefined) {
             archive.unshift(temp.getCommand());
             temp = temp.previous;
         }

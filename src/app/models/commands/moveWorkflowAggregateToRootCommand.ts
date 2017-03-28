@@ -10,16 +10,17 @@ import { CommandType } from "../command-domain/commandType";
 import { MoveCommand } from "./moveCommand";
 
 export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableCommand implements MoveCommand {
+    private previousParent: Array<WorkflowAggregate>;
+    private previousIndex: number;
+    type = CommandType.Move;
 
     constructor(
         public movingHash?: string
     ) { super(); }
 
-    private previousParent: Array<WorkflowAggregate>;
-    private previousIndex: number;
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        var workflow = queryBus.getRootObject(fork) as Workflow;
-        var movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
+        let workflow = queryBus.getRootObject(fork) as Workflow;
+        let movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
         this.previousParent = movingAggregate.parent;
         if (movingAggregate.parent) {
             this.previousIndex = movingAggregate.parent.indexOf(movingAggregate)
@@ -31,8 +32,8 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
     }
 
     undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        var movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
-        var workflow = queryBus.getRootObject(fork) as Workflow;
+        let movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
+        let workflow = queryBus.getRootObject(fork) as Workflow;
         workflow.rootAggregate().pop();
         if (this.previousParent) {
             this.previousParent.splice(this.previousIndex, 0, movingAggregate);
@@ -43,8 +44,6 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
     setTarget = (hash: string) => {
         this.movingHash = hash;
     }
-
-    type = CommandType.Move;
 
     aggregateHash = (): string => {
         return this.movingHash;

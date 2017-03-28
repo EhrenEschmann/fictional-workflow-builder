@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { WorkflowAggregate } from '../models/domain/workflow-aggregates/workflowAggregate';
 import { AggregateRoot } from '../models/domain/aggregateRoot';
 import { Workflow } from '../models/domain/workflow';
 import { DomainCache } from './domain-cache.service';
@@ -14,13 +13,13 @@ export class QueryBus {
   getRootObject = (fork: number): Workflow => {
     return this.domainStore.getWorkflow(fork)
   }
-  
+
   getRootObjects = (): Array<Workflow> => {
     return this.domainStore.getForks();
   }
 
   getTypedAggregateRoot = <T>(fork: number, hash: string): T => {
-    throw new Error("Not Built Yet.")
+    throw new Error('Not Built Yet.')
   }
 
   getAggregateRoot = (fork: number, hash: string): AggregateRoot => {
