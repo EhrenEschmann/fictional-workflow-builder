@@ -1,10 +1,7 @@
-import { Subject } from "rxjs/Subject";
-//import "rxjs/RX";
-import "rxjs/add/operator/debounceTime";
-import "rxjs/add/operator/distinctUntilChanged";
-//import "rxjs/operator/debounceTime"
+import { Subject } from 'rxjs/Subject';
+import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/distinctUntilChanged';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate'
 import { Property } from './models/domain/property';
 
 @Component({
@@ -28,7 +25,7 @@ export class PropertyEditorComponent {
     }
 
     onUpdate = (value: string): void => {
-        console.log(`current value = '${value}' now need to broadcast`)
+        console.log(`current value = '${value}' now need to broadcast`);
         this.updatedValue.next(value);
     }
 }

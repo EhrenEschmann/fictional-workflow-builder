@@ -1,13 +1,11 @@
-import { Command } from './command';
 import { FutureTargetSettableCommand } from './futureTargetSettableCommand';
 import { QueryBus } from '../../services/query-bus.service';
 import { AggregateFactory } from '../../services/aggregate-factory.service';
 import { Workflow } from '../domain/workflow';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
-import { CreateNewWorkflowAggregateCommand } from './createNewWorkflowAggregateCommand';
 import { TypeStore } from '../../services/type-store.service';
-import { CommandType } from "../command-domain/commandType";
-import { MoveCommand } from "./moveCommand";
+import { CommandType } from '../command-domain/commandType';
+import { MoveCommand } from './moveCommand';
 
 export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableCommand implements MoveCommand {
     private previousParent: Array<WorkflowAggregate>;
@@ -21,9 +19,11 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
         let workflow = queryBus.getRootObject(fork) as Workflow;
         let movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
+        if(workflow.rootAggregate().indexOf(movingAggregate) !== -1)
+            throw new Error("Aggregate Already exists at root");
         this.previousParent = movingAggregate.parent;
         if (movingAggregate.parent) {
-            this.previousIndex = movingAggregate.parent.indexOf(movingAggregate)
+            this.previousIndex = movingAggregate.parent.indexOf(movingAggregate);
             movingAggregate.parent.splice(this.previousIndex, 1);
         }
         movingAggregate.parent = workflow.rootAggregate();
@@ -57,7 +57,7 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
         return {
             __type__: this.__type__,
             movingHash: this.movingHash
-        }
+        };
     }
 }
 

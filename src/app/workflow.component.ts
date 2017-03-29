@@ -113,6 +113,10 @@ export class WorkflowComponent {
         this.mergeDialogDisplayed = false;
     }
 
+    mergeUp = (forkId: number) => {
+        this.workflowManager.mergeUp(forkId);
+    }
+
     getCommandTitles = (forkId: number): Array<string> => {
         return this.workflowManager.getCommands(forkId).map((c: Command) => c.title);
     }

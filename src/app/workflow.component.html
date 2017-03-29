@@ -14,15 +14,15 @@
 <button (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())">Undo</button>
 <button (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())">Redo</button>
 <button (click)="fork(getForkNum())">Fork</button>
-<button (click)="mergeDialogDisplayed = true" [disabled]="getParentId(getForkNum()) == undefined"> Merge Up</button>
-<button (click)="TODO" [disabled]="getChildrenForks().length == 0">Merge Down</button>
+<button (click)="mergeDialogDisplayed = true" [disabled]="getParentId(getForkNum()) == undefined"> Merge Down</button>
+<button (click)="mergeUp(getForkNum())" [disabled]="getChildrenForks().length == 0">Merge Up</button>
 <button (click)="optimize(getForkNum())"> optimize</button>
 <button (click)="addAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])">Add Aggregate</button>
-<!--<select>
+<select>
   <option *ngFor="let commandTitle of getCommandTitles(getForkNum())" value="{{commandTitle}}">
      {{commandTitle}}
   </option>
-</select>-->
+</select>
 <span>{{getStackLengths(getForkNum()).join(' + ')}}</span>
 
 <fwb-tree [aggregates]="getRootAggregates()" [fork]="getForkNum()">

@@ -155,6 +155,7 @@ export class WorkflowManager {
         }
         // TODO:  Prevent Undo gathered
         fromFork.setUndoLimit();
+        this.commandStore.findFork(toForkId).setUndoLimit();
         // --------------------------------------
         // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
         // we will prevent undo, then additional merges will only affect from that merge and on.
@@ -167,6 +168,33 @@ export class WorkflowManager {
         //            - prevent merges if children exist???
         // TODO: 2. delete (nullify) this fork
         // --------------------------------------
+    }
+
+    mergeUp = (forkId: number) => {
+        // 1. optimize
+        this.optimize(forkId);
+
+        // 2. Get children forks
+        const fork = this.commandBus.getFork(forkId);
+        const childrenForks = fork.getChildren();
+
+        // 3. get commands
+        const commands = fork.getArchive();
+
+        // loop over each, perform merge up
+        for (let childFork of childrenForks) {
+            let childForkId = childFork.getId();
+            for (let command of commands) {
+                try {
+                    this.commandBus.executeCommand(childForkId, command);
+                } catch (e) {
+                    // warnings.push(e);
+                    console.log(`Error:  ${e}`);
+                }
+            }
+            this.commandStore.findFork(childForkId).setUndoLimit();
+        }
+        fork.setUndoLimit();
     }
 
     isLoaded = (): boolean => {
