@@ -1,14 +1,15 @@
 import { Command } from './command';
-import { FutureTargetSettableCommand } from './futureTargetSettableCommand';
 import { QueryBus } from '../../services/query-bus.service';
 import { AggregateFactory } from '../../services/aggregate-factory.service';
-import { Workflow } from '../domain/workflow';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
-import { CreateNewWorkflowAggregateCommand } from './createNewWorkflowAggregateCommand';
 import { TypeStore } from '../../services/type-store.service';
-import { CommandType } from "../command-domain/commandType";
+import { CommandType } from '../command-domain/commandType';
 
 export class UpdatePropertyCommand extends Command {
+
+    private previousValue: string;
+
+    type = CommandType.Update;
 
     constructor(
         public targetHash: string,
@@ -16,9 +17,8 @@ export class UpdatePropertyCommand extends Command {
         public value: string
     ) { super(); }
 
-    private previousValue: string;
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        var target = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
+        const target = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
         this.previousValue = target.properties[this.propertyKey].value;
         target.properties[this.propertyKey].value = this.value;
 
@@ -26,7 +26,7 @@ export class UpdatePropertyCommand extends Command {
     }
 
     undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        var target = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
+        const target = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
         target.properties[this.propertyKey].value = this.previousValue;
     }
 
@@ -38,8 +38,6 @@ export class UpdatePropertyCommand extends Command {
         return this.propertyKey;
     }
 
-    type = CommandType.Update;
-
     aggregateHash = (): string => {
         return this.targetHash;
     }
@@ -50,7 +48,7 @@ export class UpdatePropertyCommand extends Command {
             targetHash: this.targetHash,
             propertyKey: this.propertyKey,
             value: this.value
-        }
+        };
     }
 }
 

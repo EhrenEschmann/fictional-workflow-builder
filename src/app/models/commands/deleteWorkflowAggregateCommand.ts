@@ -16,7 +16,7 @@ export class DeleteWorkflowAggregateCommand extends Command {
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
         let aggregate = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
         this.originalIndex = aggregate.parent.indexOf(aggregate);
-        if(this.originalIndex === -1)
+        if (this.originalIndex === -1)
             throw new Error('aggregate not part of workflow');
         aggregate.parent.splice(this.originalIndex, 1);
 

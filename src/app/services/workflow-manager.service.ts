@@ -142,6 +142,8 @@ export class WorkflowManager {
         // var commandFork = this.commandStore.findFork(forkId);
         // get the forks stack
         // let lengthToCopy = fromFork.getUndoLength();
+        this.optimize(fromFork.getId());
+        this.optimize(toForkId);
         let commands = fromFork.getArchive();   // .slice(0, lengthToCopy);
         // apply forked commands on parent as-is, Track errors with try-catch
         let warnings: Array<string> = []; // todo make type warning???
@@ -174,8 +176,10 @@ export class WorkflowManager {
         // 1. optimize
         this.optimize(forkId);
 
+        this.optimize(forkId);
         // 2. Get children forks
         const fork = this.commandBus.getFork(forkId);
+
         const childrenForks = fork.getChildren();
 
         // 3. get commands
@@ -184,6 +188,7 @@ export class WorkflowManager {
         // loop over each, perform merge up
         for (let childFork of childrenForks) {
             let childForkId = childFork.getId();
+            this.optimize(childForkId);
             for (let command of commands) {
                 try {
                     this.commandBus.executeCommand(childForkId, command);

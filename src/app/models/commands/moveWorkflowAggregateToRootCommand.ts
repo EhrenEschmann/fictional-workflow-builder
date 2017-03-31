@@ -20,7 +20,7 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
         let workflow = queryBus.getRootObject(fork) as Workflow;
         let movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
         if(workflow.rootAggregate().indexOf(movingAggregate) !== -1)
-            throw new Error("Aggregate Already exists at root");
+            throw new Error('Aggregate Already exists at root');
         this.previousParent = movingAggregate.parent;
         if (movingAggregate.parent) {
             this.previousIndex = movingAggregate.parent.indexOf(movingAggregate);

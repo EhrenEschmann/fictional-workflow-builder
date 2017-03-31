@@ -1,14 +1,17 @@
-import { Command } from './command';
 import { FutureTargetSettableCommand } from './futureTargetSettableCommand';
 import { QueryBus } from '../../services/query-bus.service';
 import { AggregateFactory } from '../../services/aggregate-factory.service';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
-import { CreateNewWorkflowAggregateCommand } from './createNewWorkflowAggregateCommand';
 import { TypeStore } from '../../services/type-store.service';
-import { CommandType } from "../command-domain/commandType";
-import { MoveCommand } from "./moveCommand";
+import { CommandType } from '../command-domain/commandType';
+import { MoveCommand } from './moveCommand';
 
 export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCommand implements MoveCommand {
+
+    private previousParent: Array<WorkflowAggregate>;
+    private previousIndex: number;
+
+    type = CommandType.Move;
 
     constructor(
         public parentHash: string,
@@ -16,18 +19,16 @@ export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCo
         public movingHash?: string
     ) { super(); }
 
-    private previousParent: Array<WorkflowAggregate>;
-    private previousIndex: number;
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        var parentAggregate = queryBus.getAggregateRoot(fork, this.parentHash) as WorkflowAggregate;
-        var movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
+        const parentAggregate = queryBus.getAggregateRoot(fork, this.parentHash) as WorkflowAggregate;
+        const movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
         if(parentAggregate.events[this.parentEvent].indexOf(movingAggregate) !== -1)
             throw new Error(`Aggregate Already exists at ${this.parentHash}, ${this.parentEvent}`);
 
         this.previousParent = movingAggregate.parent;
 
         if (movingAggregate.parent) {
-            this.previousIndex = movingAggregate.parent.indexOf(movingAggregate)
+            this.previousIndex = movingAggregate.parent.indexOf(movingAggregate);
             movingAggregate.parent.splice(this.previousIndex, 1);
         }
 
@@ -48,8 +49,6 @@ export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCo
     setTarget = (hash: string) => {
         this.movingHash = hash;
     }
-
-    type = CommandType.Move;
 
     aggregateHash = (): string => {
         return this.movingHash;

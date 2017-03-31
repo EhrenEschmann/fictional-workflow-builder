@@ -27,7 +27,7 @@ export class CreateNewWorkflowAggregateCommand extends Command {
     }
 
     undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        aggregateFactory.invalidateCache(fork, this.targetHash);
+        aggregateFactory.invalidateCache(fork, this.targetHash);
 
         for (let j = this.updateCommands.length - 1; j >= 0; j--) {
             this.updateCommands[j].undo(fork, queryBus, aggregateFactory);
