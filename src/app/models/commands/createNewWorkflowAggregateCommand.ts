@@ -23,15 +23,14 @@ export class CreateNewWorkflowAggregateCommand extends Command {
             command.execute(fork, queryBus, aggregateFactory);
         }
 
-        this.title = `Creating new ${this.aggregateType}`;
+        this.title = `Creating new ${this.aggregateType} ${this.targetHash}`;
     }
 
     undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        aggregateFactory.invalidateCache(fork, this.targetHash);
-
         for (let j = this.updateCommands.length - 1; j >= 0; j--) {
             this.updateCommands[j].undo(fork, queryBus, aggregateFactory);
         }
+        aggregateFactory.invalidateCache(fork, this.targetHash);
     }
 
     aggregateHash = (): string => {

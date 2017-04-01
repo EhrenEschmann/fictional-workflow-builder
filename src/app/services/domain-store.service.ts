@@ -1,8 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Workflow } from '../models/domain/workflow';
-import { AggregateRoot } from '../models/domain/aggregateRoot';
-import { Dictionary } from '../models/collections/dictionary';
-import { HashGenerator } from './hash-generator.service';
 import { DomainCache } from './domain-cache.service';
 
 @Injectable()
@@ -23,7 +20,7 @@ export class DomainStore {
     fork = (fromFork: number): number => {
         let newForkId = this.workflowForks.length;
         this.workflowForks.push(new Workflow(newForkId, fromFork, `fork from ${fromFork}`));
-        return this.workflowForks.length -1;
+        return this.workflowForks.length - 1;
     }
 
     getWorkflow = (fork: number): Workflow => {
@@ -31,7 +28,7 @@ export class DomainStore {
         return this.workflowForks[fork];
     }
 
-    getForks = () : Array<Workflow> => {
+    getForks = (): Array<Workflow> => {
         return this.workflowForks;
     }
 

@@ -1,9 +1,5 @@
 import { Component } from '@angular/core';
-import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate';
 import { HashGenerator } from './services/hash-generator.service';
-import { CreateNewWorkflowAggregateCommand } from './models/commands/createNewWorkflowAggregateCommand';
-import { MoveWorkflowAggregateToTargetCommand } from './models/commands/moveWorkflowAggregateToTargetCommand';
-import { MoveWorkflowAggregateToRootCommand } from './models/commands/moveWorkflowAggregateToRootCommand';
 import { WorkflowManager } from './services/workflow-manager.service';
 import { CommandBus } from './services/command-bus.service';
 import { DomainStore } from './services/domain-store.service';
@@ -11,11 +7,11 @@ import { ViewState } from './services/view-state.service';
 import { Workflow } from './models/domain/workflow';
 
 @Component({
-  selector: "fwb-app",
-  templateUrl: "./app/app.component.html"
+  selector: 'fwb-app',
+  templateUrl: './app/app.component.html'
 })
 export class AppComponent {
-  //aggregates: Array<WorkflowAggregate>;
+  // aggregates: Array<WorkflowAggregate>;
 
   constructor(private readonly hashGenerator: HashGenerator,
     private readonly workflowManager: WorkflowManager,
@@ -24,7 +20,7 @@ export class AppComponent {
     private readonly viewState: ViewState) { }
 
   createNew = (): void => {
-    this.workflowManager.createWorkflow("test");
+    this.workflowManager.createWorkflow('test');
   }
 
   activeWorkflow = (): boolean => {

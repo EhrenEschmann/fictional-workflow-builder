@@ -22,7 +22,7 @@ export class UpdatePropertyCommand extends Command {
         this.previousValue = target.properties[this.propertyKey].value;
         target.properties[this.propertyKey].value = this.value;
 
-        this.title = `updating ${target.name}'s ${this.propertyKey} value from ${this.previousValue} to ${this.value}`;
+        this.title = `updating ${this.targetHash}'s ${this.propertyKey} value from ${this.previousValue} to ${this.value}`;
     }
 
     undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {

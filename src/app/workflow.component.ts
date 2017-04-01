@@ -11,7 +11,6 @@ import { ViewState } from './services/view-state.service';
 import { Workflow } from './models/domain/workflow';
 import { MergeType } from './models/domain/mergeType';
 import { MergeTypeAware } from './decorators/mergeTypeAware.decorator';
-import { Command } from './models/commands/command';
 
 @Component({
     selector: 'fwb-workflow',
@@ -101,11 +100,11 @@ export class WorkflowComponent {
         console.log(`Merge ${forkId} with type ${type}`);
         let fork = this.commandBus.getFork(forkId);
         switch (type) {
-            case MergeType.FirstOrder:
+            case MergeType.PreOrder:
                 this.workflowManager.firstOrderMergeWorkflow(forkId);
                 break;
-            case MergeType.LastOrder:
-                this.workflowManager.lastOrderMergeWorkflow(fork, fork.getParent().getId());
+            case MergeType.PostOrder:
+                this.workflowManager.postOrderMergeWorkflow(fork, fork.getParent().getId());
                 break;
             case MergeType.ByAggregate:
 
@@ -118,7 +117,7 @@ export class WorkflowComponent {
     }
 
     getCommandTitles = (forkId: number): Array<string> => {
-        return this.workflowManager.getCommands(forkId).map((c: Command) => c.title);
+        return this.commandBus.getCommandArchive(forkId);
     }
 
     getStackLengths = (forkId: number): Array<number> => {
@@ -135,6 +134,11 @@ export class WorkflowComponent {
         }
 
         return lengths.reverse();
+    }
+
+    clear = (forkId: number) => {
+        this.workflowManager.clear(forkId);
+        this.viewState.clearSelectedAggregates(forkId);
     }
 
     // wasMerged = (forkId: number): boolean => {

@@ -9,7 +9,7 @@ import { Property } from './models/domain/property';
     templateUrl: './app/property-editor.component.html'
 })
 export class PropertyEditorComponent {
-    @Input() key: string; 
+    @Input() key: string;
     @Input() property: Property;
     @Output() valueChanged: EventEmitter<string>;
 

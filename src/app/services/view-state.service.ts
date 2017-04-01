@@ -6,7 +6,7 @@ export class ViewState {
   selectedAggregate: Array<WorkflowAggregate>;
   selectedEvent: Array<string>;
 
-  constructor() { 
+  constructor() {
     this.selectedAggregate = [];
     this.selectedEvent = [];
   }

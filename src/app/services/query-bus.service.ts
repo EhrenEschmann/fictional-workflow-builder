@@ -8,10 +8,10 @@ import { DomainStore } from './domain-store.service';
 export class QueryBus {
 
   constructor(private readonly domainStore: DomainStore,
-  private readonly domainCache: DomainCache) { }
+    private readonly domainCache: DomainCache) { }
 
   getRootObject = (fork: number): Workflow => {
-    return this.domainStore.getWorkflow(fork)
+    return this.domainStore.getWorkflow(fork);
   }
 
   getRootObjects = (): Array<Workflow> => {
@@ -19,7 +19,7 @@ export class QueryBus {
   }
 
   getTypedAggregateRoot = <T>(fork: number, hash: string): T => {
-    throw new Error('Not Built Yet.')
+    throw new Error('Not Built Yet.');
   }
 
   getAggregateRoot = (fork: number, hash: string): AggregateRoot => {
@@ -27,7 +27,7 @@ export class QueryBus {
   }
 
   query = (target: AggregateRoot, query: Array<string>): any => {
-    if(query[0])
+    if (query[0])
       return this.query(target[query[0]], query.slice(1));
   }
 }

@@ -50,6 +50,10 @@ export class CommandFork {
     getStart = (): number => {
         return this.start;
     }
+
+    setStart = (start: number) => {
+        this.start = start;
+    }
     // getLength = (): number => {
     //     throw new Error("todo: get length of this stack + this.start + parent starts")
     //     //return this.commands.getLength(); 

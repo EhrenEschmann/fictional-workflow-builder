@@ -51,7 +51,7 @@ export class WorkflowManager {
         if (domainFork !== commandFork) throw new Error('inconsistent domain/command fork state');
         this.domainCache.createCache(domainFork);
 
-        let previousCommands: Array<Command> = this.getCommands(fromFork);
+        let previousCommands: Array<Command> = this.getFullHistoryOfCommands(fromFork);
 
         for (let command of previousCommands) {
             try {
@@ -62,7 +62,7 @@ export class WorkflowManager {
         }
     }
 
-    getCommands = (forkId: number): Array<Command> => {
+    getFullHistoryOfCommands = (forkId: number): Array<Command> => {
         let previousCommands: Array<Command> = [];
         let fork = this.commandStore.findFork(forkId);
         let lengthToCopy = fork.getCurrentLength();
@@ -125,6 +125,7 @@ export class WorkflowManager {
             }
         }
         console.log('completed with warnings: ' + warnings);
+        this.commandStore.findFork(forkId).setUndoLimit();
     }
 
     firstOrderMergeWorkflow = (forkId: number) => {
@@ -132,7 +133,7 @@ export class WorkflowManager {
 
     }
 
-    lastOrderMergeWorkflow = (fromFork: CommandFork, toForkId: number) => {
+    postOrderMergeWorkflow = (fromFork: CommandFork, toForkId: number) => {
         console.log('TODO:  Optimize before fork!');
         // domain stays intact
         // // get parent 
@@ -142,22 +143,37 @@ export class WorkflowManager {
         // var commandFork = this.commandStore.findFork(forkId);
         // get the forks stack
         // let lengthToCopy = fromFork.getUndoLength();
-        this.optimize(fromFork.getId());
-        this.optimize(toForkId);
-        let commands = fromFork.getArchive();   // .slice(0, lengthToCopy);
-        // apply forked commands on parent as-is, Track errors with try-catch
-        let warnings: Array<string> = []; // todo make type warning???
-        for (let command of commands) {
+        //
+        // this.optimize(toForkId);
+        // this.optimize(fromFork.getId()); // This might optimize away a delete
+        let toFork = this.commandStore.findFork(toForkId);
+        let fromCommands = fromFork.getArchive();   // .slice(0, lengthToCopy);
+        let toCommands = toFork.getArchive();
+
+        let allCommands = toCommands.concat(fromCommands);
+
+        for (let i = 0; i < toCommands.length; i++) {
+            this.commandBus.undoCommand(toForkId);
+        }
+        for (let i = 0; i < fromCommands.length; i++) {
+            this.commandBus.undoCommand(fromFork.getId());
+        }
+        this.domainStore.clear(fromFork.getId());
+
+        allCommands = this.commandOptimizer.optimize(allCommands);
+
+        for (let command of allCommands) {
             try {
                 this.commandBus.executeCommand(toForkId, command);
+                this.commandBus.executeCommand(fromFork.getId(), command, true);
             } catch (e) {
-                warnings.push(e);
                 console.log(`Error:  ${e}`);
             }
         }
-        // TODO:  Prevent Undo gathered
-        fromFork.setUndoLimit();
-        this.commandStore.findFork(toForkId).setUndoLimit();
+        fromFork.setStart(allCommands.length);
+        fromFork.clearStack();
+        toFork.setUndoLimit();
+
         // --------------------------------------
         // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
         // we will prevent undo, then additional merges will only affect from that merge and on.
@@ -172,34 +188,108 @@ export class WorkflowManager {
         // --------------------------------------
     }
 
+    // lastOrderMergeWorkflow = (fromFork: CommandFork, toForkId: number) => {
+    //     console.log('TODO:  Optimize before fork!');
+    //     // domain stays intact
+    //     // // get parent 
+    //     // var fork = this.domainStore.getWorkflow(forkId);
+    //     // var parentForkId = fork.getParent();
+    //     // //      get fork 
+    //     // var commandFork = this.commandStore.findFork(forkId);
+    //     // get the forks stack
+    //     // let lengthToCopy = fromFork.getUndoLength();
+    //     //
+    //     this.optimize(toForkId);
+    //     let commands = fromFork.getArchive();   // .slice(0, lengthToCopy);
+    //     // apply forked commands on parent as-is, Track errors with try-catch
+    //     let warnings: Array<string> = []; // todo make type warning???
+    //     for (let command of commands) {
+    //         try {
+    //             this.commandBus.executeCommand(toForkId, command);
+    //         } catch (e) {
+    //             warnings.push(e);
+    //             console.log(`Error:  ${e}`);
+    //         }
+    //     }
+    //     // TODO:  Prevent Undo gathered
+    //     fromFork.setUndoLimit();
+    //     this.commandStore.findFork(toForkId).setUndoLimit();
+
+    //     this.optimize(fromFork.getId()); // This might optimize away a delete
+    //     // --------------------------------------
+    //     // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
+    //     // we will prevent undo, then additional merges will only affect from that merge and on.
+    //     // commandFork.setUndoLimit();
+    //     // TODO: 1. assign children forks as children of parent.
+    //     //   --> Unfortunately, children are no longer the same since their parent is changed,  reinitialize the fork ? 
+    //     //            - no, leave it. we can store the start so we can choose to ignore all the changes after the start
+    //     //            - wait, we can store the first start, but the second start could occur later in it's history (last order merge)
+    //     //            - force a merge up after this completes, that will fix our problem.
+    //     //            - prevent merges if children exist???
+    //     // TODO: 2. delete (nullify) this fork
+    //     // --------------------------------------
+    // }
+
     mergeUp = (forkId: number) => {
         // 1. optimize
         this.optimize(forkId);
 
-        this.optimize(forkId);
-        // 2. Get children forks
+        // 2. Get fork
         const fork = this.commandBus.getFork(forkId);
-
-        const childrenForks = fork.getChildren();
 
         // 3. get commands
         const commands = fork.getArchive();
+
+        // 4. Get children forks
+        const childrenForks = fork.getChildren();
 
         // loop over each, perform merge up
         for (let childFork of childrenForks) {
             let childForkId = childFork.getId();
             this.optimize(childForkId);
+
+            let originalCommands = this.commandStore.getArchive(childForkId);
+            for (let i = 0; i < originalCommands.length; i++) {
+                try {
+                    this.commandBus.undoCommand(childForkId, 1); // go 1 at a time in case there are errors.
+                } catch (e) {
+                    console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
+                }
+            }
+
+            this.domainStore.clear(childForkId);
+
             for (let command of commands) {
                 try {
-                    this.commandBus.executeCommand(childForkId, command);
+                    this.commandBus.executeCommand(childForkId, command, true);
                 } catch (e) {
                     // warnings.push(e);
                     console.log(`Error:  ${e}`);
                 }
             }
+
+            for (let originalCommand of originalCommands) {
+                try {
+                    this.commandBus.executeCommand(childForkId, originalCommand); // go 1 at a time in case there are errors.
+                } catch (e) {
+                    console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
+                }
+            }
             this.commandStore.findFork(childForkId).setUndoLimit();
+            this.commandStore.findFork(childForkId).setStart(commands.length);
         }
         fork.setUndoLimit();
+    }
+
+    clear = (forkId: number) => {
+        const archive = this.commandStore.getArchive(forkId);
+        for (let originalCommand of archive) {
+            try {
+                this.commandBus.undoCommand(forkId); // go 1 at a time in case there are errors.
+            } catch (e) {
+                console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
+            }
+        }
     }
 
     isLoaded = (): boolean => {

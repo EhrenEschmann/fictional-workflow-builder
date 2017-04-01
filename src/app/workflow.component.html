@@ -4,8 +4,8 @@
     </p-header>
     TODO: Define merges here
     <p-footer>
-        <button (click)="merge(getForkNum(), MergeType.FirstOrder)">First Order</button>
-        <button (click)="merge(getForkNum(), MergeType.LastOrder)">Last Order</button>
+        <button (click)="merge(getForkNum(), MergeType.PreOrder)">Pre Order</button>
+        <button (click)="merge(getForkNum(), MergeType.PostOrder)">Post Order</button>
         <button (click)="merge(getForkNum(), MergeType.ByAggregate)">By Aggregate</button>
     </p-footer>
 </p-dialog>
@@ -17,6 +17,7 @@
 <button (click)="mergeDialogDisplayed = true" [disabled]="getParentId(getForkNum()) == undefined"> Merge Down</button>
 <button (click)="mergeUp(getForkNum())" [disabled]="getChildrenForks().length == 0">Merge Up</button>
 <button (click)="optimize(getForkNum())"> optimize</button>
+<button (click)="clear(getForkNum())"> clear</button>
 <button (click)="addAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])">Add Aggregate</button>
 <select>
   <option *ngFor="let commandTitle of getCommandTitles(getForkNum())" value="{{commandTitle}}">

@@ -20,7 +20,7 @@ import { TypeStore } from './services/type-store.service';
 import { CommandOptimizer } from './services/command-optimizer.service';
 import { ValuesPipe } from './pipes/valuesPipe.pipe';
 import { PropertyEditorComponent } from './property-editor.component';
-//import { UUID } from 'angular2-uuid';
+// import { UUID } from 'angular2-uuid';
 import './models/domain/workflow-aggregates/executeCompiledBinaryWorkflowAggregate';
 import './models/domain/workflow-aggregates/postRestApiWorkflowAggregate';
 import './models/domain/workflow-aggregates/sendEmailWorkflowAggregate';

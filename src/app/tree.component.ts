@@ -1,9 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate';
-import { ViewState } from "./services/view-state.service";
-import { CommandBus } from "./services/command-bus.service";
-import { UpdatePropertyCommand } from "./models/commands/updatePropertyCommand";
-import { DeleteWorkflowAggregateCommand } from "./models/commands/deleteWorkflowAggregateCommand";
+import { ViewState } from './services/view-state.service';
+import { CommandBus } from './services/command-bus.service';
+import { UpdatePropertyCommand } from './models/commands/updatePropertyCommand';
+import { DeleteWorkflowAggregateCommand } from './models/commands/deleteWorkflowAggregateCommand';
 
 @Component({
     selector: 'fwb-tree',
@@ -26,12 +26,12 @@ export class TreeComponent {
 
     updateProperty(fork: number, aggregate: WorkflowAggregate, propertyKey: string, newValue: string) {
         console.log(fork, aggregate, propertyKey, newValue);
-        var command = new UpdatePropertyCommand(aggregate.getHash(), propertyKey, newValue);
+        const command = new UpdatePropertyCommand(aggregate.getHash(), propertyKey, newValue);
         this.commandBus.executeCommand(fork, command);
     }
 
     deleteAggregate = (fork: number, aggregateHash: string): void => {
-        var command = new DeleteWorkflowAggregateCommand(aggregateHash);
+        const command = new DeleteWorkflowAggregateCommand(aggregateHash);
         this.commandBus.executeCommand(fork, command);
     }
 }

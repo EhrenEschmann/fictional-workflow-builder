@@ -1,6 +1,6 @@
-import { Component, Input, Output, OnInit, EventEmitter } from '@angular/core';
-import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate'
-import { ViewState } from "./services/view-state.service";
+import { Component, Input, OnInit } from '@angular/core';
+import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate';
+import { ViewState } from './services/view-state.service';
 
 @Component({
     selector: 'fwb-tree-node',
@@ -9,7 +9,6 @@ import { ViewState } from "./services/view-state.service";
 export class TreeNodeComponent implements OnInit {
     @Input() fork: number;
     @Input() aggregate: WorkflowAggregate;
-    //@Output() onSelectAggregate: EventEmitter<any> = new EventEmitter();
 
     constructor(private readonly viewState: ViewState) { }
 
@@ -28,10 +27,4 @@ export class TreeNodeComponent implements OnInit {
     ngOnInit() {
         console.log(this.aggregate);
     }
-
-    //IsExpanded: boolean = false; 
-    // toggle() {
-    //     this.IsExpanded = !this.IsExpanded;
-    //     console.log(this.IsExpanded + " " + this.aggregate);
-    // }
 }

@@ -18,7 +18,7 @@ export class CommandBus {
             this.commandStore.storeCommand(fork, command);
     }
 
-    undoCommand = (fork: number, count: number): void => {
+    undoCommand = (fork: number, count = 1): void => {
         for (let i = 0; i < count; i++) {
             const command = this.commandStore.undo(fork);
             command.undo(fork, this.queryBus, this.aggregateFactory);
@@ -44,7 +44,7 @@ export class CommandBus {
         return this.commandStore.getArchiveTitles(fork);
     }
 
-    getFork = (fork: number) : CommandFork => {
+    getFork = (fork: number): CommandFork => {
         return this.commandStore.findFork(fork);
     }
 }
