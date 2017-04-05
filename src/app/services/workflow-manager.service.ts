@@ -180,7 +180,6 @@ export class WorkflowManager {
             }
         }
         // fromFork.setStart(allCommands.length);
-
 
         let newArchive = toFork.getArchive().concat(toFork.getCurrent());
         for (let command of newArchive) {
