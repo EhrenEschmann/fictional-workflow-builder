@@ -1,4 +1,3 @@
-
 export enum CommandType {
     Move = 0,
     Create = 1,

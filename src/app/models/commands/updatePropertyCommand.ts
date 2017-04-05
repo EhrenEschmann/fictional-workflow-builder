@@ -42,6 +42,10 @@ export class UpdatePropertyCommand extends Command {
         return this.targetHash;
     }
 
+    getValue = (): string => {
+        return `[${this.value}]`;
+    }
+
     toJSON() {
         return {
             __type__: this.__type__,

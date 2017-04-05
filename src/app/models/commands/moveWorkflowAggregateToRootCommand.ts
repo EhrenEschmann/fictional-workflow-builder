@@ -19,7 +19,7 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
         let workflow = queryBus.getRootObject(fork) as Workflow;
         let movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
-        if(workflow.rootAggregate().indexOf(movingAggregate) !== -1)
+        if (workflow.rootAggregate().indexOf(movingAggregate) !== -1)
             throw new Error('Aggregate Already exists at root');
         this.previousParent = movingAggregate.parent;
         if (movingAggregate.parent) {
@@ -51,6 +51,10 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
 
     getNewParentHash = (): string => {
         return undefined;
+    }
+
+    getValue = (): string => {
+        return 'Root';
     }
 
     toJSON() {

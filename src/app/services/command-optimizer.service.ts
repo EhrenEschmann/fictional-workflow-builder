@@ -3,8 +3,9 @@ import { Command } from '../models/commands/command';
 import { CreateNewWorkflowAggregateCommand } from '../models/commands/createNewWorkflowAggregateCommand';
 import { UpdatePropertyCommand } from '../models/commands/updatePropertyCommand';
 import { Dictionary } from '../models/collections/dictionary';
-import { AggregateCommandPartition } from '../models/command-domain/aggregateCommandPartition';
+import { AggregateCommandPartition, ConsolidatedAggregateCommandPartition } from '../models/command-domain/aggregateCommandPartition';
 import { CommandType } from '../models/command-domain/commandType';
+import { CommandConflict } from '../models/command-domain/commandConflict';
 
 @Injectable()
 export class CommandOptimizer {
@@ -34,15 +35,6 @@ export class CommandOptimizer {
                 partitions[hash] = new AggregateCommandPartition(hash, i);
 
             this.updatePartition(partitions[hash], command);
-
-            if (command instanceof CreateNewWorkflowAggregateCommand) {
-                let nestedCommands = (command as CreateNewWorkflowAggregateCommand).updateCommands;
-
-                for (let nestedCommand of nestedCommands)
-                    this.updatePartition(partitions[hash], nestedCommand);
-
-                (command as CreateNewWorkflowAggregateCommand).updateCommands = [];
-            }
         }
         return partitions;
     }
@@ -65,16 +57,81 @@ export class CommandOptimizer {
         return prunedPartitions;
     }
 
+    private consolidate(partitions: Dictionary<AggregateCommandPartition>): Dictionary<ConsolidatedAggregateCommandPartition> {
+        let consolidated: Dictionary<ConsolidatedAggregateCommandPartition> = {};
+        for (let hash in partitions) {
+            if (partitions.hasOwnProperty(hash)) {
+                consolidated[hash] = partitions[hash].getConsolidated();
+            }
+        }
+        return consolidated;
+    }
+
+    flattenStack = (originalCommands: Array<Command>): Array<Command> => {
+        for (let i = 0; i < originalCommands.length; i++) {
+            let command = originalCommands[i];
+
+            if (command instanceof CreateNewWorkflowAggregateCommand) {
+                let nestedCommands = (command as CreateNewWorkflowAggregateCommand).updateCommands;
+                (command as CreateNewWorkflowAggregateCommand).updateCommands = [];
+                originalCommands = originalCommands.slice(0, i + 1).concat(nestedCommands).concat(originalCommands.slice(i + 1));
+            }
+        }
+        return originalCommands;
+    }
+
     optimize = (originalCommands: Array<Command>): Array<Command> => {
+        // Flatten Stack???
+        originalCommands = this.flattenStack(originalCommands);
         let partitions: Dictionary<AggregateCommandPartition> = this.partition(originalCommands);
         partitions = this.pruneDeletedDependencies(partitions);
-        for (let hash in partitions) {
-            partitions[hash].consolidateUpdates();
-        }
+        let consolidatedPartitions = this.consolidate(partitions);
         let optimizedStack: Array<Command> = [];
-        for (let hash in partitions) {
-            optimizedStack = optimizedStack.concat(partitions[hash].getOrderedCommands());
+        for (let hash in consolidatedPartitions) {
+            if (consolidatedPartitions.hasOwnProperty(hash)) {
+                optimizedStack = optimizedStack.concat(consolidatedPartitions[hash].getOrderedCommands());
+            }
         }
         return optimizedStack;
+    }
+
+    getConflicts = (fromCommands: Array<Command>, toCommands: Array<Command>): Array<CommandConflict> => {
+        let fromPartitions = this.consolidate(this.partition(fromCommands));
+        // fromPartitions = this.consolidate(fromPartitions);
+        let toPartitions = this.consolidate(this.partition(toCommands));
+        // toPartitions = toPartitions);
+
+        let conflicts: Array<CommandConflict> = [];
+        for (let fromHash in fromPartitions) {
+            // TODO:  Also check for moves, updates to objects that dont exist anymore in toParititions
+            // TODO:  If we start with toParitions, will we have to worry about this extra case?
+            if (toPartitions[fromHash]) { // if there was a change in both forks
+                // 1.  Cant both have a create; auto-merge deletes
+                if (!fromPartitions[fromHash].deleteCommand) {
+                    // TODO:  don't need to do this if there are deletes:
+                    // 2. Check for Move conflict
+                    if (toPartitions[fromHash].moveCommand) { // possible conflict
+                        let toCommand = toPartitions[fromHash].moveCommand;
+                        let fromCommand = fromPartitions[fromHash].moveCommand;
+                        if (fromCommand && toCommand)
+                            if (toCommand.generateHash() !== fromCommand.generateHash()) // conflict
+                                conflicts.push(new CommandConflict(fromPartitions[fromHash].moveCommand,
+                                    toPartitions[fromHash].moveCommand));
+                    }
+                    // 3.  check for update conflict
+                    for (let fromProperty in fromPartitions[fromHash].updateCommands) {
+                        if (fromPartitions[fromHash].updateCommands.hasOwnProperty(fromProperty)) {
+                            let toCommand = toPartitions[fromHash].updateCommands[fromProperty];
+                            let fromCommand = fromPartitions[fromHash].updateCommands[fromProperty];
+                            if (toCommand && toCommand.value !== fromCommand.value) { // conflict
+                                conflicts.push(new CommandConflict(fromPartitions[fromHash].updateCommands[fromProperty],
+                                    toPartitions[fromHash].updateCommands[fromProperty]));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return conflicts;
     }
 }

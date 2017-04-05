@@ -47,4 +47,23 @@ export class CommandBus {
     getFork = (fork: number): CommandFork => {
         return this.commandStore.findFork(fork);
     }
+
+    private clearArchive (forkId: number): void {
+        const archive = this.getFork(forkId).getArchive();
+        for (let i = archive.length-1; i >= 0; i--) {
+            archive[i].undo(forkId, this.queryBus, this.aggregateFactory);
+        }
+    }
+
+    clearCurrent = (forkId: number): void => {
+        const current = this.getFork(forkId).getCurrent();
+        for (let i = 0; i < current.length; i++) {
+            this.undoCommand(forkId);
+        }
+    }
+
+    clear = (forkId: number): void => {
+        this.clearCurrent(forkId);
+        this.clearArchive(forkId);
+    }
 }

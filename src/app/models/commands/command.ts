@@ -1,31 +1,30 @@
-import { QueryBus } from "../../services/query-bus.service";
-import { AggregateFactory } from "../../services/aggregate-factory.service";
-import { CommandType } from "../command-domain/commandType";
+import { QueryBus } from '../../services/query-bus.service';
+import { AggregateFactory } from '../../services/aggregate-factory.service';
+import { CommandType } from '../command-domain/commandType';
 
 export abstract class Command {
-  constructor() { }
+
+  title: string = 'Command Executed';
+  abstract aggregateHash: () => string;
   abstract execute: (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
   abstract undo: (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
-  title: string = "Command Executed";
+  abstract getValue: () => string;
+
+  abstract type: CommandType;
+  __type__: string = (this.constructor as any).name;
+
+  constructor() { }
 
   generateHash() { // TODO: Ignore certain id's (element could be the same with a different hash)
-    var hash = 0;
-    var string = JSON.stringify(this.toJSON())
-    for (var i = 0; i < string.length; i++) {
-      var char = string.charCodeAt(i);
+    let hash = 0;
+    let string = JSON.stringify(this.toJSON());
+    for (let i = 0; i < string.length; i++) {
+      let char = string.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash |= 0; // Convert to 32bit integer
     }
     return hash;
   }
 
-  abstract type: CommandType;
-
-  abstract aggregateHash: () => string;
-
-  //Override toJSON method on commands for JSON.Stringify()
   abstract toJSON(): Object;
-
-  //Serves to help with de-serialization of commands
-  __type__: string = (this.constructor as any).name;
 }

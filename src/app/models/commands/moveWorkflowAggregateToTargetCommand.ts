@@ -22,7 +22,7 @@ export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCo
     execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
         const parentAggregate = queryBus.getAggregateRoot(fork, this.parentHash) as WorkflowAggregate;
         const movingAggregate = queryBus.getAggregateRoot(fork, this.movingHash) as WorkflowAggregate;
-        if(parentAggregate.events[this.parentEvent].indexOf(movingAggregate) !== -1)
+        if (parentAggregate.events[this.parentEvent].indexOf(movingAggregate) !== -1)
             throw new Error(`Aggregate Already exists at ${this.parentHash}, ${this.parentEvent}`);
 
         this.previousParent = movingAggregate.parent;
@@ -56,6 +56,10 @@ export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCo
 
     getNewParentHash = (): string => {
         return this.parentHash;
+    }
+
+    getValue = (): string => {
+        return `[${this.parentHash}][${this.parentEvent}]`;
     }
 
     toJSON() {

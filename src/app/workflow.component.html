@@ -1,20 +1,58 @@
-<p-dialog [(visible)]="mergeDialogDisplayed">
+<p-dialog [(visible)]="mergeDialogDisplayed" *ngIf="getForkNum() !== 0">
     <p-header>
         Merge {{getForkNum()}} up to {{workflow.getParent()}}
     </p-header>
-    TODO: Define merges here
+    <!--<div *ngFor="let conflict of getConflicts(getForkNum())">
+        <span> {{conflict.getAggregate()}}</span>
+        <span> {{conflict.getType()}}</span>
+        <span> {{conflict.getFromValue()}}</span>
+        <span> {{conflict.getToValue()}}</span>
+        <button (click)="resolve(conflict, Resolution.Parent)">take parent</button>
+        <button (click)="resolve(conflict, Resolution.Child)">take child</button>
+    </div>-->
+    <table>
+        <tr>
+            <th>Aggregate</th>
+            <th>Type</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Options</th>
+        </tr>
+        <tr *ngFor="let conflict of conflicts">
+            <td>
+                {{conflict.getAggregate()}}
+            </td>
+            <td>
+                {{conflict.getType()}}
+            </td>
+            <td>
+                {{conflict.getFromValue()}}
+            </td>
+            <td>
+                {{conflict.getToValue()}}
+            </td>
+            <td>
+                <button (click)="resolve(conflict, Resolution.Parent)">take parent</button>
+                <button (click)="resolve(conflict, Resolution.Child)">take child</button>
+            </td>
+        </tr>
+    </table>
+     <p-footer>
+        <button (click)="mergeDown(getForkNum()); mergeDialogDisplayed = false">merge!</button>
+    </p-footer>
+    <!--TODO: Define merges here
     <p-footer>
         <button (click)="merge(getForkNum(), MergeType.PreOrder)">Pre Order</button>
         <button (click)="merge(getForkNum(), MergeType.PostOrder)">Post Order</button>
         <button (click)="merge(getForkNum(), MergeType.ByAggregate)">By Aggregate</button>
-    </p-footer>
+    </p-footer>-->
 </p-dialog>
 <hr />
 <span>{{getForkNum()}}</span>
 <button (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())">Undo</button>
 <button (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())">Redo</button>
 <button (click)="fork(getForkNum())">Fork</button>
-<button (click)="mergeDialogDisplayed = true" [disabled]="getParentId(getForkNum()) == undefined"> Merge Down</button>
+<button (click)="attemptMergeDown(getForkNum())" [disabled]="getParentId(getForkNum()) == undefined"> Merge Down</button>
 <button (click)="mergeUp(getForkNum())" [disabled]="getChildrenForks().length == 0">Merge Up</button>
 <button (click)="optimize(getForkNum())"> optimize</button>
 <button (click)="clear(getForkNum())"> clear</button>

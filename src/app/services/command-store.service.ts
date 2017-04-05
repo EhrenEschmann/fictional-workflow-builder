@@ -9,7 +9,7 @@ export class CommandStore {
   constructor() { }
 
   startMainLine = (): void => {
-    this.workflow = new CommandFork(0, 0, undefined);
+    this.workflow = new CommandFork(0);
   }
 
   loadFork = (workflowForks: Array<CommandFork>): void => {
@@ -47,8 +47,9 @@ export class CommandStore {
   fork = (fromFork: number): number => {
     let fork = this.findFork(fromFork);
     let newId = this.getSize();
-    fork.setUndoLimit();
-    fork.addChild(new CommandFork(newId, fork.getCurrentLength(), fork));
+    // fork.setUndoLimit();
+    let newArchive = fork.getArchive().concat(fork.getCurrent());
+    fork.addChild(new CommandFork(newId, newArchive, fork));
     return newId;
   }
 
@@ -73,14 +74,10 @@ export class CommandStore {
   }
 
   getArchive = (fork: number): Array<Command> => {
-    return this.findFork(fork).getArchive();
+    return this.findFork(fork).getCurrent();
   }
 
   getArchiveTitles = (fork: number): Array<string> => {
     return this.getArchive(fork).map((command: Command) => command.title);
-  }
-
-  clear = (forkId: number): void => {
-    this.findFork(forkId).clearStack();
   }
 }

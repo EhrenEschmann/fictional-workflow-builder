@@ -28,9 +28,12 @@ export class DeleteWorkflowAggregateCommand extends Command {
         aggregate.parent.splice(this.originalIndex, 0, aggregate);
     }
 
-
     aggregateHash = (): string => {
         return this.targetHash;
+    }
+
+    getValue = (): string => {
+        return 'Delete';
     }
 
     toJSON() {

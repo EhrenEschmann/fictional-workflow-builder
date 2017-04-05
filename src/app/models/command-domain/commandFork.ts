@@ -10,9 +10,11 @@ export class CommandFork {
 
     constructor(
         private readonly id: number,
-        private start: number,
+        private archive?: Array<Command>,
         private parentFork?: CommandFork
     ) {
+        if (!this.archive)
+            this.archive = [];
         this.commands = new CommandStack();
         this.childrenForks = [];
         // this.merged = false;
@@ -37,31 +39,42 @@ export class CommandFork {
     getParent = (): CommandFork => {
         return this.parentFork;
     }
-
-    setParent = (newParent: CommandFork): void => {
-        this.start = this.start + newParent.getStart();
-        this.parentFork = newParent;
-    }
+    // Parent never changes.
+    // setParent = (newParent: CommandFork): void => {
+    //     this.start = this.start + newParent.getStart();
+    //     this.parentFork = newParent;
+    // }
 
     getChildren = (): Array<CommandFork> => {
         return this.childrenForks;
     }
 
-    getStart = (): number => {
-        return this.start;
+    getArchive = (): Array<Command> => {
+        return this.archive;
     }
 
-    setStart = (start: number) => {
-        this.start = start;
+    setArchive = (archive: Array<Command>): void => {
+        this.archive = archive;
     }
+
+    getCurrent = (): Array<Command> => {
+        return this.commands.getArchive();
+    }
+    // getStart = (): number => {
+    //     return this.start;
+    // }
+
+    // setStart = (start: number) => {
+    //     this.start = start;
+    // }
     // getLength = (): number => {
     //     throw new Error("todo: get length of this stack + this.start + parent starts")
     //     //return this.commands.getLength(); 
     // }
 
-    setUndoLimit = (): void => {
-        this.undoLimit = this.commands.getLength();
-    }
+    // setUndoLimit = (): void => {
+    //     this.undoLimit = this.commands.getLength();
+    // }
 
     getCurrentLength = (): number => {
         return this.commands.getLength();
@@ -87,11 +100,7 @@ export class CommandFork {
         return this.commands.unPop();
     }
 
-    getArchive = (): Array<Command> => {
-        return this.commands.getArchive();
-    }
-
-    clearStack = (): void => {
-        this.commands.clear();
-    }
+    // clearStack = (): void => {
+    //     this.commands.clear();
+    // }
 }

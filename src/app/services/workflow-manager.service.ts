@@ -6,6 +6,7 @@ import { DomainCache } from './domain-cache.service';
 import { CommandFork } from '../models/command-domain/commandFork';
 import { Command } from '../models/commands/command';
 import { CommandOptimizer } from './command-optimizer.service';
+import { CommandConflict } from '../models/command-domain/commandConflict';
 
 // TODO:  The public contract should all exist on the command or querybus (commandBus.initialize(), queryBus.initialize())
 @Injectable()
@@ -45,35 +46,36 @@ export class WorkflowManager {
         return fork.getRedoLength() === 0;
     }
 
-    forkWorkflow = (fromFork: number) => {
-        let domainFork = this.domainStore.fork(fromFork);
-        let commandFork = this.commandStore.fork(fromFork);
-        if (domainFork !== commandFork) throw new Error('inconsistent domain/command fork state');
-        this.domainCache.createCache(domainFork);
+    forkWorkflow = (fromForkId: number) => {
+        let domainForkId = this.domainStore.fork(fromForkId);
+        let commandForkId = this.commandStore.fork(fromForkId);
+        if (domainForkId !== commandForkId) throw new Error('inconsistent domain/command fork state');
+        this.domainCache.createCache(domainForkId);
 
-        let previousCommands: Array<Command> = this.getFullHistoryOfCommands(fromFork);
+        let commandFork = this.commandStore.findFork(fromForkId);
+        let newArchive: Array<Command> = commandFork.getArchive().concat(commandFork.getCurrent());
 
-        for (let command of previousCommands) {
+        for (let command of newArchive) {
             try {
-                this.commandBus.executeCommand(domainFork, command, true);
+                this.commandBus.executeCommand(domainForkId, command, true);
             } catch (e) {
                 console.log(`Error:  ${e}`);
             }
         }
     }
 
-    getFullHistoryOfCommands = (forkId: number): Array<Command> => {
-        let previousCommands: Array<Command> = [];
-        let fork = this.commandStore.findFork(forkId);
-        let lengthToCopy = fork.getCurrentLength();
-        while (fork !== undefined) {
-            previousCommands = fork.getArchive().slice(0, lengthToCopy).concat(previousCommands);
-            lengthToCopy = fork.getStart();
-            fork = fork.getParent();
-        }
+    // getFullHistoryOfCommands = (forkId: number): Array<Command> => {
+    //     let previousCommands: Array<Command> = [];
+    //     let fork = this.commandStore.findFork(forkId);
+    //     let lengthToCopy = fork.getCurrentLength();
+    //     while (fork !== undefined) {
+    //         previousCommands = fork.getArchive().slice(0, lengthToCopy).concat(previousCommands);
+    //         lengthToCopy = fork.getStart();
+    //         fork = fork.getParent();
+    //     }
 
-        return previousCommands;
-    }
+    //     return previousCommands;
+    // }
 
     optimize = (forkId: number): void => {
         // restore to previous state
@@ -125,12 +127,7 @@ export class WorkflowManager {
             }
         }
         console.log('completed with warnings: ' + warnings);
-        this.commandStore.findFork(forkId).setUndoLimit();
-    }
-
-    firstOrderMergeWorkflow = (forkId: number) => {
-        // trucate domain side (or undo up to forked location, apply, then redo)
-
+        // this.commandStore.findFork(forkId).setUndoLimit();
     }
 
     postOrderMergeWorkflow = (fromFork: CommandFork, toForkId: number) => {
@@ -147,32 +144,55 @@ export class WorkflowManager {
         // this.optimize(toForkId);
         // this.optimize(fromFork.getId()); // This might optimize away a delete
         let toFork = this.commandStore.findFork(toForkId);
-        let fromCommands = fromFork.getArchive();   // .slice(0, lengthToCopy);
-        let toCommands = toFork.getArchive();
+        let fromCommands = fromFork.getCurrent();   // .slice(0, lengthToCopy);
+        let toCommands = toFork.getCurrent();
 
         let allCommands = toCommands.concat(fromCommands);
 
-        for (let i = 0; i < toCommands.length; i++) {
-            this.commandBus.undoCommand(toForkId);
-        }
-        for (let i = 0; i < fromCommands.length; i++) {
-            this.commandBus.undoCommand(fromFork.getId());
-        }
-        this.domainStore.clear(fromFork.getId());
+        // for (let i = 0; i < toCommands.length; i++) {
+        //     this.commandBus.undoCommand(toForkId);
+        // }
+        // for (let i = 0; i < fromCommands.length; i++) {
+        //     this.commandBus.undoCommand(fromFork.getId());
+        // }
 
+        // clear and rebuild toFork from archive
+        this.commandBus.clearCurrent(toForkId);
+        // for (let command of toFork.getArchive()) {
+        //     try {
+        //         this.commandBus.executeCommand(toForkId, command, true);
+        //     } catch (e) {
+        //         console.log(`Error:  ${e}`);
+        //     }
+        // }
+        // clear and rebuild toFork from ~~NEW~~ archive
+        this.commandBus.clear(fromFork.getId());
+
+        // This command modifies the original commands; all prep work must be done before this.
         allCommands = this.commandOptimizer.optimize(allCommands);
 
         for (let command of allCommands) {
             try {
                 this.commandBus.executeCommand(toForkId, command);
+                //this.commandBus.executeCommand(fromFork.getId(), command, true);
+            } catch (e) {
+                console.log(`Error:  ${e}`);
+            }
+        }
+        // fromFork.setStart(allCommands.length);
+
+
+        let newArchive = toFork.getArchive().concat(toFork.getCurrent());
+        for (let command of newArchive) {
+            try {
                 this.commandBus.executeCommand(fromFork.getId(), command, true);
             } catch (e) {
                 console.log(`Error:  ${e}`);
             }
         }
-        fromFork.setStart(allCommands.length);
-        fromFork.clearStack();
-        toFork.setUndoLimit();
+        fromFork.setArchive(newArchive);
+        // fromFork.clearStack();
+        // toFork.setUndoLimit();
 
         // --------------------------------------
         // then what?  remove fork?  we can only do this once, IF we append the commands to the fork
@@ -230,6 +250,15 @@ export class WorkflowManager {
     //     // --------------------------------------
     // }
 
+    mergeDown = (fromFork: CommandFork, toFork: CommandFork) => {
+        // let conflicts = this.commandOptimizer.getConflicts(fromFork.getCurrent(), toFork.getCurrent());
+
+    }
+
+    getConflicts = (fromFork: CommandFork, toFork: CommandFork): Array<CommandConflict> => {
+        return this.commandOptimizer.getConflicts(fromFork.getCurrent(), toFork.getCurrent());
+    }
+
     mergeUp = (forkId: number) => {
         // 1. optimize
         this.optimize(forkId);
@@ -238,12 +267,12 @@ export class WorkflowManager {
         const fork = this.commandBus.getFork(forkId);
 
         // 3. get commands
-        const commands = fork.getArchive();
+        const commands = fork.getCurrent();
 
         // 4. Get children forks
         const childrenForks = fork.getChildren();
 
-        // loop over each, perform merge up
+        // loop over each child, perform merge up
         for (let childFork of childrenForks) {
             let childForkId = childFork.getId();
             this.optimize(childForkId);
@@ -275,10 +304,11 @@ export class WorkflowManager {
                     console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
                 }
             }
-            this.commandStore.findFork(childForkId).setUndoLimit();
-            this.commandStore.findFork(childForkId).setStart(commands.length);
+            // this.commandStore.findFork(childForkId).setUndoLimit();
+            // this.commandStore.findFork(childForkId).setStart(commands.length);
+            this.commandStore.findFork(childForkId).setArchive(commands);
         }
-        fork.setUndoLimit();
+        // fork.setUndoLimit();
     }
 
     clear = (forkId: number) => {

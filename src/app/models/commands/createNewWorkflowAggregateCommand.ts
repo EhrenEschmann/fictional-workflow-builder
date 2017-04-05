@@ -37,11 +37,15 @@ export class CreateNewWorkflowAggregateCommand extends Command {
         return this.targetHash;
     }
 
+    getValue = (): string => {
+        return 'Create';
+    }
+
     toJSON() {
         return {
             __type__: this.__type__,
-            targetHash: this.targetHash,
             aggregateType: this.aggregateType,
+            targetHash: this.targetHash,
             updateCommands: this.updateCommands
         };
     }

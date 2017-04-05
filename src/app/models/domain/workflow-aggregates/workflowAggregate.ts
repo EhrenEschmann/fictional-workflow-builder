@@ -3,13 +3,14 @@ import { AggregateRoot } from '../aggregateRoot';
 import { Property } from '../property';
 
 export abstract class WorkflowAggregate implements AggregateRoot {
-
-    constructor(private readonly hash: string) { }
-
     abstract name: string;
     parent: Array<WorkflowAggregate>;
     events: Dictionary<Array<WorkflowAggregate>>;
     properties: Dictionary<Property> = {};
+
+    constructor(
+        private readonly hash: string
+    ) { }
 
     getHash = (): string => {
         return this.hash;

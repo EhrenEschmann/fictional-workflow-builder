@@ -3,6 +3,35 @@ import { CreateNewWorkflowAggregateCommand } from '../commands/createNewWorkflow
 import { Dictionary } from '../collections/dictionary';
 import { UpdatePropertyCommand } from '../commands/updatePropertyCommand';
 
+export class ConsolidatedAggregateCommandPartition {
+    constructor(
+        public createCommand: CreateNewWorkflowAggregateCommand,
+        public moveCommand: Command,
+        public updateCommands: Dictionary<UpdatePropertyCommand>,
+        public deleteCommand: Command
+    ) { }
+
+    getOrderedCommands = (): Array<Command> => {
+        let commands: Array<Command> = [];
+        if (this.createCommand)
+            commands.push(this.createCommand);
+        if (this.moveCommand)
+            commands.push(this.moveCommand);
+        for (let hash in this.updateCommands) {
+            if (this.updateCommands.hasOwnProperty(hash)) {
+                if (this.updateCommands[hash])
+                    commands.push(this.updateCommands[hash]);
+            }
+        }
+        // if (this.updateCommands.length > 0)
+        //     commands = commands.concat(this.updateCommands);
+        if (this.deleteCommand)
+            commands.push(this.deleteCommand);
+
+        return commands;
+    }
+}
+
 export class AggregateCommandPartition {
 
     private createCommand: CreateNewWorkflowAggregateCommand;
@@ -10,10 +39,14 @@ export class AggregateCommandPartition {
     private updateCommands: Array<UpdatePropertyCommand> = [];
     private deleteCommand: Command;
 
+    private updateCommandLookup: Dictionary<UpdatePropertyCommand>;
+
     constructor(
         public readonly hash: string,
         public readonly order: number
-    ) { }
+    ) {
+        this.updateCommandLookup = {};
+    }
 
     getHash = (): string => {
         return this.hash;
@@ -43,6 +76,7 @@ export class AggregateCommandPartition {
 
     addUpdateCommand = (command: UpdatePropertyCommand): void => {
         this.updateCommands.push(command);
+        this.updateCommandLookup[command.propertyKey] = command;
     }
 
     addDeleteCommand = (command: Command): void => {
@@ -57,18 +91,34 @@ export class AggregateCommandPartition {
         this.moveCommands = [];
     }
 
-    consolidateUpdates = (): void => {
-        let lookup: Dictionary<UpdatePropertyCommand> = {};
-        for (let command of this.updateCommands) {
-            lookup[command.propertyKey] = command;
-        }
-
-        let consolidated: Array<UpdatePropertyCommand> = [];
-        for (let key in lookup) {
-            consolidated.push(lookup[key]);
-        }
-        this.updateCommands = consolidated;
+    getUpdateCommandLookup = (): Dictionary<UpdatePropertyCommand> => {
+        return this.updateCommandLookup;
     }
+
+    getLastMoveCommand = (): Dictionary<UpdatePropertyCommand> => {
+        return this.updateCommandLookup;
+    }
+
+    getConsolidated = (): ConsolidatedAggregateCommandPartition => {
+        return new ConsolidatedAggregateCommandPartition(this.createCommand,
+            this.moveCommands[this.moveCommands.length - 1],
+            this.updateCommandLookup,
+            this.deleteCommand
+        );
+    }
+
+    // private consolidateUpdates(): void {
+    //     let consolidated: Array<UpdatePropertyCommand> = [];
+    //     for (let key in this.updateCommandLookup) {
+    //         consolidated.push(this.updateCommandLookup[key]);
+    //     }
+    //     this.updateCommands = consolidated;
+    // }
+
+    // consolidate = (): void => {
+    //     this.consolidateUpdates();
+    //     this.moveCommands.splice(0,)
+    // }
 
     getOrderedCommands = (): Array<Command> => {
         let commands: Array<Command> = [];

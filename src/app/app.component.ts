@@ -13,11 +13,13 @@ import { Workflow } from './models/domain/workflow';
 export class AppComponent {
   // aggregates: Array<WorkflowAggregate>;
 
-  constructor(private readonly hashGenerator: HashGenerator,
+  constructor(
+    private readonly hashGenerator: HashGenerator,
     private readonly workflowManager: WorkflowManager,
     private readonly commandBus: CommandBus,
     private readonly domainStore: DomainStore,
-    private readonly viewState: ViewState) { }
+    private readonly viewState: ViewState
+  ) { }
 
   createNew = (): void => {
     this.workflowManager.createWorkflow('test');
