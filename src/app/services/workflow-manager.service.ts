@@ -79,7 +79,7 @@ export class WorkflowManager {
 
     optimize = (forkId: number): void => {
         // restore to previous state
-        let originalCommands = this.commandStore.getArchive(forkId);
+        let originalCommands = this.commandBus.getFork(forkId).getCurrent(); // this.commandStore.getArchive(forkId);
         for (let originalCommand of originalCommands) {
             try {
                 this.commandBus.undoCommand(forkId, 1); // go 1 at a time in case there are errors.
@@ -131,7 +131,7 @@ export class WorkflowManager {
     }
 
     postOrderMergeWorkflow = (fromFork: CommandFork, toForkId: number) => {
-        console.log('TODO:  Optimize before fork!');
+        // console.log('TODO:  Optimize before fork!');
         // domain stays intact
         // // get parent 
         // var fork = this.domainStore.getWorkflow(forkId);
@@ -174,7 +174,7 @@ export class WorkflowManager {
         for (let command of allCommands) {
             try {
                 this.commandBus.executeCommand(toForkId, command);
-                //this.commandBus.executeCommand(fromFork.getId(), command, true);
+                // this.commandBus.executeCommand(fromFork.getId(), command, true);
             } catch (e) {
                 console.log(`Error:  ${e}`);
             }
@@ -266,7 +266,8 @@ export class WorkflowManager {
         const fork = this.commandBus.getFork(forkId);
 
         // 3. get commands
-        const commands = fork.getCurrent();
+        let commands = fork.getArchive().concat(fork.getCurrent());
+        commands = this.commandOptimizer.optimize(commands);
 
         // 4. Get children forks
         const childrenForks = fork.getChildren();
@@ -274,27 +275,29 @@ export class WorkflowManager {
         // loop over each child, perform merge up
         for (let childFork of childrenForks) {
             let childForkId = childFork.getId();
-            this.optimize(childForkId);
+            // this.optimize(childForkId);
 
-            let originalCommands = this.commandStore.getArchive(childForkId);
-            for (let i = 0; i < originalCommands.length; i++) {
-                try {
-                    this.commandBus.undoCommand(childForkId, 1); // go 1 at a time in case there are errors.
-                } catch (e) {
-                    console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
-                }
-            }
+            let originalCommands = childFork.getCurrent();
 
-            this.domainStore.clear(childForkId);
+            // for (let i = 0; i < originalCommands.length; i++) {
+            //     // try {
+            //         this.commandBus.undoCommand(childForkId, 1); // go 1 at a time in case there are errors.
+            //     // } catch (e) {
+            //     //     console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
+            //     // }
+            // }
+            this.commandBus.clear(childFork.getId());
+            // this.domainStore.clear(childForkId);
 
             for (let command of commands) {
-                try {
-                    this.commandBus.executeCommand(childForkId, command, true);
-                } catch (e) {
-                    // warnings.push(e);
-                    console.log(`Error:  ${e}`);
-                }
+                // try {
+                this.commandBus.executeCommand(childForkId, command, true);
+                // } catch (e) {
+                //     // warnings.push(e);
+                //     console.log(`Error:  ${e}`);
+                // }
             }
+            childFork.setArchive(commands);
 
             for (let originalCommand of originalCommands) {
                 try {
@@ -305,21 +308,22 @@ export class WorkflowManager {
             }
             // this.commandStore.findFork(childForkId).setUndoLimit();
             // this.commandStore.findFork(childForkId).setStart(commands.length);
-            this.commandStore.findFork(childForkId).setArchive(commands);
+            // this.commandStore.findFork(childForkId).setArchive(commands);
         }
         // fork.setUndoLimit();
     }
 
-    clear = (forkId: number) => {
-        const archive = this.commandStore.getArchive(forkId);
-        for (let originalCommand of archive) {
-            try {
-                this.commandBus.undoCommand(forkId); // go 1 at a time in case there are errors.
-            } catch (e) {
-                console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
-            }
-        }
-    }
+     clear = (forkId: number) => {
+         this.commandBus.clear(forkId);
+    //     const archive = this.commandStore.getArchive(forkId);
+    //     for (let originalCommand of archive) {
+    //         try {
+    //             this.commandBus.undoCommand(forkId); // go 1 at a time in case there are errors.
+    //         } catch (e) {
+    //             console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
+    //         }
+    //     }
+     }
 
     isLoaded = (): boolean => {
         return this.domainStore.isLoaded();

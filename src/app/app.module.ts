@@ -1,7 +1,9 @@
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { DialogModule } from 'primeng/primeng';
+import { RouterModule, Routes } from '@angular/router';
+import { DialogModule, ButtonModule, SplitButtonModule, InputTextModule, DropdownModule } from 'primeng/primeng';
+
 import { AppComponent } from './app.component';
 import { WorkflowComponent } from './workflow.component';
 import { TreeComponent } from './tree.component';
@@ -30,13 +32,18 @@ import './models/commands/moveWorkflowAggregateToRootCommand';
 import './models/commands/createNewWorkflowAggregateCommand';
 import './models/commands/updatePropertyCommand';
 
+const appRoutes: Routes = [
+  { path: 'app', component: AppComponent }
+];
+
 @NgModule({
-  imports: [BrowserModule, FormsModule, DialogModule],
+  imports: [BrowserModule, FormsModule, RouterModule.forRoot(appRoutes), DialogModule,
+    ButtonModule, SplitButtonModule, InputTextModule, DropdownModule],
   declarations: [AppComponent, WorkflowComponent, TreeComponent, TreeNodeComponent,
-                PropertyEditorComponent, ValuesPipe],
+    PropertyEditorComponent, ValuesPipe],
   bootstrap: [AppComponent],
   providers: [QueryBus, HashGenerator, WindowRef, WorkflowManager, DomainStore,
-              DomainCache, CommandStore, CommandBus, AggregateFactory, ViewState,
-              TypeStore, CommandOptimizer]
+    DomainCache, CommandStore, CommandBus, AggregateFactory, ViewState,
+    TypeStore, CommandOptimizer]
 })
 export class AppModule { }

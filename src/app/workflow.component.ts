@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate';
 import { HashGenerator } from './services/hash-generator.service';
 import { CreateNewWorkflowAggregateCommand } from './models/commands/createNewWorkflowAggregateCommand';
@@ -9,7 +9,6 @@ import { CommandBus } from './services/command-bus.service';
 import { QueryBus } from './services/query-bus.service';
 import { ViewState } from './services/view-state.service';
 import { Workflow } from './models/domain/workflow';
-import { MergeType } from './models/domain/mergeType';
 import { MergeTypeAware } from './decorators/mergeTypeAware.decorator';
 import { ResolutionAware } from './decorators/resolutionAware.decorator';
 import { CommandConflict } from './models/command-domain/commandConflict';
@@ -21,17 +20,49 @@ import { Resolution } from './models/domain/resolution';
 })
 @ResolutionAware
 @MergeTypeAware
-export class WorkflowComponent {
+export class WorkflowComponent implements OnInit {
     @Input() workflow: Workflow;
     // aggregates: Array<WorkflowAggregate>;
 
     private mergeDialogDisplayed: boolean = false;
+    private availableAggregates: Array<any>;
 
-    constructor(private readonly hashGenerator: HashGenerator,
+    constructor(
+        private readonly hashGenerator: HashGenerator,
         private readonly workflowManager: WorkflowManager,
         private readonly commandBus: CommandBus,
         private readonly queryBus: QueryBus,
-        private readonly viewState: ViewState) { }
+        private readonly viewState: ViewState
+    ) { }
+
+    ngOnInit() {
+        this.availableAggregates = [
+            {
+                label: 'Execute Compiled Binary',
+                command: () => {
+                    const forkId = this.getForkNum();
+                    this.addAggregate(forkId, this.viewState.selectedAggregate[forkId],
+                        this.viewState.selectedEvent[forkId], 'ExecuteCompiledBinaryWorkflowAggregate');
+                }
+            },
+            {
+                label: 'Post Rest Api',
+                command: () => {
+                    const forkId = this.getForkNum();
+                    this.addAggregate(forkId, this.viewState.selectedAggregate[forkId],
+                        this.viewState.selectedEvent[forkId], 'PostRestApiWorkflowAggregate');
+                }
+            }, {
+                label: 'Send Email',
+                command: () => {
+                    const forkId = this.getForkNum();
+                    this.addAggregate(forkId, this.viewState.selectedAggregate[forkId],
+                        this.viewState.selectedEvent[forkId], 'SendEmailWorkflowAggregate');
+                }
+            }
+        ];
+    }
+
 
 
     canUndo = (forkId: number): boolean => {
@@ -65,10 +96,12 @@ export class WorkflowComponent {
         return this.workflow.getForkId();
     }
 
-    addAggregate = (fork: number, parent: WorkflowAggregate, event: string, aggregateType: string): void => {
-        // var selectedAggregate = this.viewState.selectedAggregate;
-        aggregateType = 'PostRestApiWorkflowAggregate';
+    addRandomAggregate = (fork: number, parent: WorkflowAggregate, event: string): void => {
+        const random = Math.floor(Math.random() * 3);
+        this.availableAggregates[random].command();
+    }
 
+    addAggregate = (fork: number, parent: WorkflowAggregate, event: string, aggregateType: string): void => {
         let createCommand = new CreateNewWorkflowAggregateCommand(aggregateType, this.hashGenerator.createHash());
         let moveCommand = (parent && event)
             ? new MoveWorkflowAggregateToTargetCommand(parent.getHash(), event)
@@ -132,6 +165,7 @@ export class WorkflowComponent {
     mergeDown = (forkId: number) => {
         let fork = this.commandBus.getFork(forkId);
         this.workflowManager.postOrderMergeWorkflow(fork, fork.getParent().getId());
+        this.viewState.clearSelectedAggregates(forkId);
     }
 
     private conflicts: Array<CommandConflict> = [];
@@ -147,10 +181,11 @@ export class WorkflowComponent {
 
     mergeUp = (forkId: number): void => {
         this.workflowManager.mergeUp(forkId);
+        this.viewState.clearSelectedAggregates(forkId);
     }
 
-    getCommandTitles = (forkId: number): Array<string> => {
-        return this.commandBus.getCommandArchive(forkId);
+    getCommandTitles = (forkId: number): Array<Object> => {
+        return this.commandBus.getCommandArchive(forkId).map((str) => { return { 'label': str }; });
     }
 
     getStackLengths = (forkId: number): Array<number> => {
@@ -182,11 +217,12 @@ export class WorkflowComponent {
 
     optimize = (forkId: number) => {
         this.workflowManager.optimize(forkId);
+        this.viewState.clearSelectedAggregates(forkId);
     }
 
     resolve = (conflict: CommandConflict, resolution: Resolution): void => {
         const fromForkId = this.getForkNum();
-        const toForkId = this.getParentId(fromForkId);
+        // const toForkId = this.getParentId(fromForkId);
 
         if (resolution === Resolution.Parent) {
             this.commandBus.executeCommand(fromForkId, conflict.toCommand);

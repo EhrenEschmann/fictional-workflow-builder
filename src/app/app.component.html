@@ -1,6 +1,6 @@
-<button (click)="createNew()" [disabled]="activeWorkflow()">create new workflow</button>
-<button (click)="open()">open workflow</button>
-<button (click)="save()">save workflow</button>
+<button pButton (click)="createNew()" [disabled]="activeWorkflow()" label="create new workflow"></button>
+<button pButton (click)="open()" label="open workflow"></button>
+<button pButton (click)="save()" label="save workflow"></button>
 
 <fwb-workflow *ngIf="getRootFork()" [workflow]="getRootFork()">
 </fwb-workflow>

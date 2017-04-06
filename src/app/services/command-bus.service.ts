@@ -48,9 +48,9 @@ export class CommandBus {
         return this.commandStore.findFork(fork);
     }
 
-    private clearArchive (forkId: number): void {
+    private clearArchive(forkId: number): void {
         const archive = this.getFork(forkId).getArchive();
-        for (let i = archive.length-1; i >= 0; i--) {
+        for (let i = archive.length - 1; i >= 0; i--) {
             archive[i].undo(forkId, this.queryBus, this.aggregateFactory);
         }
     }

@@ -32,13 +32,13 @@
                 {{conflict.getToValue()}}
             </td>
             <td>
-                <button (click)="resolve(conflict, Resolution.Parent)">take parent</button>
-                <button (click)="resolve(conflict, Resolution.Child)">take child</button>
+                <button pButton (click)="resolve(conflict, Resolution.Parent)" label="take parent"></button>
+                <button pButton (click)="resolve(conflict, Resolution.Child)" label="take child"></button>
             </td>
         </tr>
     </table>
      <p-footer>
-        <button (click)="mergeDown(getForkNum()); mergeDialogDisplayed = false">merge!</button>
+        <button pButton (click)="mergeDown(getForkNum()); mergeDialogDisplayed = false" label="merge!"></button>
     </p-footer>
     <!--TODO: Define merges here
     <p-footer>
@@ -49,19 +49,22 @@
 </p-dialog>
 <hr />
 <span>{{getForkNum()}}</span>
-<button (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())">Undo</button>
-<button (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())">Redo</button>
-<button (click)="fork(getForkNum())">Fork</button>
-<button (click)="attemptMergeDown(getForkNum())" [disabled]="getParentId(getForkNum()) == undefined"> Merge Down</button>
-<button (click)="mergeUp(getForkNum())" [disabled]="getChildrenForks().length == 0">Merge Up</button>
-<button (click)="optimize(getForkNum())"> optimize</button>
-<button (click)="clear(getForkNum())"> clear</button>
-<button (click)="addAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])">Add Aggregate</button>
-<select>
+<button pButton (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())"label="Undo"></button>
+<button pButton (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())"label="Redo"></button>
+<button pButton (click)="fork(getForkNum())"label="Fork"></button>
+<button pButton (click)="attemptMergeDown(getForkNum())" [disabled]="getParentId(getForkNum()) == undefined"label=" Merge Down"></button>
+<button pButton (click)="mergeUp(getForkNum())" [disabled]="getChildrenForks().length == 0"label="Merge Up"> </button>
+<button pButton (click)="optimize(getForkNum())"label="optimize"></button>
+<button pButton (click)="clear(getForkNum())"label="clear"></button>
+<p-splitButton icon="fa-add" (onClick)="addRandomAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])" 
+    label="Add Random Aggregate" [model]="availableAggregates">
+</p-splitButton>
+<p-dropdown [options]="getCommandTitles(getForkNum())" ></p-dropdown>
+<!--<select>
   <option *ngFor="let commandTitle of getCommandTitles(getForkNum())" value="{{commandTitle}}">
      {{commandTitle}}
   </option>
-</select>
+</select>-->
 <span>{{getStackLengths(getForkNum()).join(' + ')}}</span>
 
 <fwb-tree [aggregates]="getRootAggregates()" [fork]="getForkNum()">

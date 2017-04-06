@@ -49,10 +49,17 @@ export class CommandOptimizer {
                     prunedPartitions[hash] = partitions[hash];
                 }
             } else if (!partitions[hash].deleted())
-                if (partitions[hash].getParentAggregateHash() === undefined) // signals root level aggregateCommandPartition
+                if (partitions[hash].getParentAggregateHash() === undefined) { // signals root level aggregateCommandPartition
                     prunedPartitions[hash] = partitions[hash];
-                else if (prunedPartitions[partitions[hash].getParentAggregateHash()])
-                    prunedPartitions[hash] = partitions[hash];
+                    // } else if (prunedPartitions[partitions[hash].getParentAggregateHash()]) { <-- this is asking if a command
+                        //  exists that creates its parent, but that wont exist on nested forks who don't store their parent information.
+                } else {
+                    const parentHash = partitions[hash].getParentAggregateHash();
+                    // we can only prune here if getparentHash exists and it was deleted
+                    if (!(partitions[parentHash] && partitions[parentHash].deleted())) {
+                        prunedPartitions[hash] = partitions[hash];
+                    }
+                }
         }
         return prunedPartitions;
     }

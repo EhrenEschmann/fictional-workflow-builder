@@ -37,9 +37,9 @@ export class DomainStore {
     }
 
     // TODO:  Dont HAVE to do this; just display for good measure.
-    clear = (forkId: number): void => {
-        let name = this.workflowForks[forkId].getName();
-        let forkFrom = this.workflowForks[forkId].getParent();
-        this.workflowForks[forkId] = new Workflow(forkId, forkFrom, name);
-    }
+    // clear = (forkId: number): void => {
+    //     let name = this.workflowForks[forkId].getName();
+    //     let forkFrom = this.workflowForks[forkId].getParent();
+    //     this.workflowForks[forkId] = new Workflow(forkId, forkFrom, name);
+    // }
 }
