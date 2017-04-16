@@ -7,8 +7,10 @@ import { DomainStore } from './domain-store.service';
 @Injectable()
 export class QueryBus {
 
-  constructor(private readonly domainStore: DomainStore,
-    private readonly domainCache: DomainCache) { }
+  constructor(
+    private readonly domainStore: DomainStore,
+    private readonly domainCache: DomainCache
+  ) { }
 
   getRootObject = (fork: number): Workflow => {
     return this.domainStore.getWorkflow(fork);

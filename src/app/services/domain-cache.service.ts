@@ -7,7 +7,9 @@ import { HashGenerator } from './hash-generator.service';
 export class DomainCache {
     private cache: Array<Dictionary<AggregateRoot>>;
 
-    constructor(private readonly hashGenerator: HashGenerator) {
+    constructor(
+        private readonly hashGenerator: HashGenerator
+    ) {
         this.cache = [];
     }
 
@@ -26,14 +28,4 @@ export class DomainCache {
     get = (fork: number, hash: string): AggregateRoot => {
         return this.cache[fork][hash];
     }
-
-    // getCache = (pageId: string | number, type?: any): Array<any> => {
-    //     if (!type)
-    //         return this.cache[pageId];
-    //     return this.cache[pageId]
-    //         .filter((cachedItem: CacheItem) => {
-    //             if (!cachedItem.deleted && cachedItem.item instanceof type)
-    //                 return cachedItem.item;
-    //         });
-    // }
 }

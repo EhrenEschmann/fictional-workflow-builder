@@ -73,11 +73,11 @@ export class CommandStore {
     return this.findFork(fork).getRedoLength();
   }
 
-  getArchive = (fork: number): Array<Command> => {
+  getCurrent = (fork: number): Array<Command> => {
     return this.findFork(fork).getCurrent();
   }
 
-  getArchiveTitles = (fork: number): Array<string> => {
-    return this.getArchive(fork).map((command: Command) => command.title);
-  }
+  // getArchiveTitles = (fork: number): Array<string> => {
+  //   return this.getArchive(fork).map((command: Command) => command.title);
+  // }
 }

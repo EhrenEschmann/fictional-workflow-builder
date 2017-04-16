@@ -5,7 +5,9 @@ import { WindowRef } from './window-ref.service';
 export class HashGenerator {
 
     // private readonly windowObj: Window
-    constructor(private winRef: WindowRef) { }
+    constructor(
+        private readonly winRef: WindowRef
+    ) { }
 
     createHash = (): string => {
         let random = (Math.random() * 100000000000000000).toString(); // "";//UUID.UUID();

@@ -15,7 +15,7 @@ export class Workflow {
         return this.forkId;
     }
 
-    public getName = () => {
+    getName = () => {
         return this.name;
     }
 

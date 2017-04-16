@@ -8,9 +8,11 @@ import { CommandFork } from '../models/command-domain/commandFork';
 @Injectable()
 export class CommandBus {
 
-    constructor(private readonly commandStore: CommandStore,
+    constructor(
+        private readonly commandStore: CommandStore,
         private readonly aggregateFactory: AggregateFactory,
-        private readonly queryBus: QueryBus) { }
+        private readonly queryBus: QueryBus
+    ) { }
 
     executeCommand = (fork: number, command: Command, ignorePersist?: boolean): void => {
         command.execute(fork, this.queryBus, this.aggregateFactory);
@@ -40,8 +42,9 @@ export class CommandBus {
         return this.commandStore.getRedoCount(fork);
     }
 
-    getCommandArchive = (fork: number): Array<string> => {
-        return this.commandStore.getArchiveTitles(fork);
+    getCurrentCommandTitles = (fork: number): Array<string> => {
+        return this.commandStore.getCurrent(fork)
+            .map((command: Command) => command.title);
     }
 
     getFork = (fork: number): CommandFork => {

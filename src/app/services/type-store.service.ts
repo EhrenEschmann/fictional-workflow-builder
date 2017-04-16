@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Dictionary } from '../models/collections/dictionary';
+
 @Injectable()
 export class TypeStore {
 

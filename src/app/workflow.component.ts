@@ -22,7 +22,6 @@ import { Resolution } from './models/domain/resolution';
 @MergeTypeAware
 export class WorkflowComponent implements OnInit {
     @Input() workflow: Workflow;
-    // aggregates: Array<WorkflowAggregate>;
 
     private mergeDialogDisplayed: boolean = false;
     private availableAggregates: Array<any>;
@@ -63,8 +62,6 @@ export class WorkflowComponent implements OnInit {
         ];
     }
 
-
-
     canUndo = (forkId: number): boolean => {
         return this.workflowManager.canUndo(forkId);
     }
@@ -72,12 +69,6 @@ export class WorkflowComponent implements OnInit {
     undo = (fork: number, count: number): void => {
         this.commandBus.undoCommand(fork, count);
         this.viewState.clearSelectedAggregates(fork);
-        // var selectedAggregate = this.viewState.selectedAggregate[fork];
-        // if (selectedAggregate) {
-        //     var parentExists = this.queryBus.getAggregateRoot(fork, selectedAggregate.getHash());
-        //     if (!parentExists)
-        //         this.viewState.clearSelectedAggregates(fork);
-        // }
     }
 
     getParentId = (forkId: number): number => {
@@ -133,96 +124,64 @@ export class WorkflowComponent implements OnInit {
         });
     }
 
-    // merge = (forkId: number, type: MergeType) => {
-    //     console.log(`Merge ${forkId} with type ${type}`);
-    //     let fork = this.commandBus.getFork(forkId);
-    //     switch (type) {
-    //         case MergeType.PreOrder:
-    //             this.workflowManager.firstOrderMergeWorkflow(forkId);
-    //             break;
-    //         case MergeType.PostOrder:
-    //             this.workflowManager.postOrderMergeWorkflow(fork, fork.getParent().getId());
-    //             break;
-    //         case MergeType.ByAggregate:
-
-    //     }
-    //     this.mergeDialogDisplayed = false;
-    // }
-
-    // merge = (forkId: number) => {
-
-    // }
-
-    attemptMergeDown = (forkId: number) => {
+    attemptMergeUp = (forkId: number) => {
         this.updateConflicts(forkId);
         if (this.conflicts.length > 0) {
             this.mergeDialogDisplayed = true;
         } else {
-            this.mergeDown(forkId);
+            this.mergeUp(forkId);
         }
     }
 
-    mergeDown = (forkId: number) => {
+    mergeUp = (forkId: number) => {
         let fork = this.commandBus.getFork(forkId);
-        this.workflowManager.postOrderMergeWorkflow(fork, fork.getParent().getId());
+        this.workflowManager.postOrderMergeUpWorkflow(fork, fork.getParent().getId());
         this.viewState.clearSelectedAggregates(forkId);
+
+        // this.workflowManager.deleteFork(forkId);
     }
 
     private conflicts: Array<CommandConflict> = [];
     updateConflicts = (forkId: number): void => {
         const fork = this.commandBus.getFork(forkId);
         this.conflicts = this.workflowManager.getConflicts(fork, fork.getParent());
-        // if (this.conflicts.length === 0)
-        //     this.workflowManager.mergeDown(fork, fork.getParent());
-        // else {
-        //     // resolve conflicts
-        // }
     }
 
-    mergeUp = (forkId: number): void => {
-        this.workflowManager.mergeUp(forkId);
+    mergeDown = (forkId: number): void => {
+        this.workflowManager.mergeDown(forkId);
         this.viewState.clearSelectedAggregates(forkId);
     }
 
+    commandTitles: Array<Object> = [];
     getCommandTitles = (forkId: number): Array<Object> => {
-        return this.commandBus.getCommandArchive(forkId).map((str) => { return { 'label': str }; });
+        let current = this.commandBus.getCurrentCommandTitles(forkId);
+
+        if (current.length > this.commandTitles.length) {
+            const toAdd = current.slice(this.commandTitles.length, current.length);
+            this.commandTitles = this.commandTitles.concat(toAdd.map((str) => { return { 'label': str }; }));
+        } else if(current.length < this.commandTitles.length) {
+            this.commandTitles = current.map((str) => { return { 'label': str }; });
+        }
+        return this.commandTitles;
     }
 
     getStackLengths = (forkId: number): Array<number> => {
-        //  const currentFork = this.queryBus.getRootObject(forkId);
-        //  const lengths: Array<number> = [currentFork.];
         const fork = this.commandBus.getFork(forkId);
         return [fork.getArchive().length, fork.getCurrent().length];
-        //     lengths.push(this.commandBus.getCommandArchive(currentFork.getForkId()).length);
-
-        //     while (currentFork !== undefined) {
-        //         if (currentFork.getParent() !== undefined) {
-        //             lengths.push(this.commandBus.getFork(currentFork.getForkId()).getStart());
-        //         }
-        //         currentFork = this.queryBus.getRootObject(currentFork.getParent());
-        //     }
-
-        //     return lengths.reverse();
     }
 
     clear = (forkId: number) => {
-        this.workflowManager.clear(forkId);
+        this.workflowManager.clearCurrent(forkId);
         this.viewState.clearSelectedAggregates(forkId);
     }
-
-    // wasMerged = (forkId: number): boolean => {
-    //     let fork = this.commandBus.getFork(forkId);
-    //     return fork.wasMerged();
-    // }
 
     optimize = (forkId: number) => {
         this.workflowManager.optimize(forkId);
         this.viewState.clearSelectedAggregates(forkId);
     }
 
-    resolve = (conflict: CommandConflict, resolution: Resolution): void => {
+    resolveConflict = (conflict: CommandConflict, resolution: Resolution): void => {
         const fromForkId = this.getForkNum();
-        // const toForkId = this.getParentId(fromForkId);
 
         if (resolution === Resolution.Parent) {
             this.commandBus.executeCommand(fromForkId, conflict.toCommand);

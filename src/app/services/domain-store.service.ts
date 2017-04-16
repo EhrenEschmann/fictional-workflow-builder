@@ -6,7 +6,9 @@ import { DomainCache } from './domain-cache.service';
 export class DomainStore {
     private workflowForks: Array<Workflow>;
 
-    constructor(private readonly domainCache: DomainCache) { }
+    constructor(
+        private readonly domainCache: DomainCache
+    ) { }
 
     create = (name: string) => {
         this.workflowForks = [];

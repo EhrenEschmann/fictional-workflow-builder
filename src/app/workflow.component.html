@@ -1,6 +1,6 @@
 <p-dialog [(visible)]="mergeDialogDisplayed" *ngIf="getForkNum() !== 0">
     <p-header>
-        Merge {{getForkNum()}} up to {{workflow.getParent()}}
+        Merge {{getForkNum()}} down to {{workflow.getParent()}}
     </p-header>
     <!--<div *ngFor="let conflict of getConflicts(getForkNum())">
         <span> {{conflict.getAggregate()}}</span>
@@ -32,13 +32,13 @@
                 {{conflict.getToValue()}}
             </td>
             <td>
-                <button pButton (click)="resolve(conflict, Resolution.Parent)" label="take parent"></button>
-                <button pButton (click)="resolve(conflict, Resolution.Child)" label="take child"></button>
+                <button pButton (click)="resolveConflict(conflict, Resolution.Parent)" label="take parent"></button>
+                <button pButton (click)="resolveConflict(conflict, Resolution.Child)" label="take child"></button>
             </td>
         </tr>
     </table>
      <p-footer>
-        <button pButton (click)="mergeDown(getForkNum()); mergeDialogDisplayed = false" label="merge!"></button>
+        <button pButton (click)="mergeUp(getForkNum()); mergeDialogDisplayed = false" label="merge!"></button>
     </p-footer>
     <!--TODO: Define merges here
     <p-footer>
@@ -52,8 +52,8 @@
 <button pButton (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())"label="Undo"></button>
 <button pButton (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())"label="Redo"></button>
 <button pButton (click)="fork(getForkNum())"label="Fork"></button>
-<button pButton (click)="attemptMergeDown(getForkNum())" [disabled]="getParentId(getForkNum()) == undefined"label=" Merge Down"></button>
-<button pButton (click)="mergeUp(getForkNum())" [disabled]="getChildrenForks().length == 0"label="Merge Up"> </button>
+<button pButton (click)="attemptMergeUp(getForkNum())" [disabled]="getParentId(getForkNum()) == undefined"label=" Merge Up"></button>
+<button pButton (click)="mergeDown(getForkNum())" [disabled]="getChildrenForks().length == 0"label="Merge Down"> </button>
 <button pButton (click)="optimize(getForkNum())"label="optimize"></button>
 <button pButton (click)="clear(getForkNum())"label="clear"></button>
 <p-splitButton icon="fa-add" (onClick)="addRandomAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])" 
