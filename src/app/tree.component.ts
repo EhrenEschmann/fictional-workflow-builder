@@ -13,8 +13,10 @@ export class TreeComponent {
     @Input() fork: number;
     @Input() aggregates: Array<WorkflowAggregate>;
 
-    constructor(private readonly viewState: ViewState,
-        private readonly commandBus: CommandBus) { }
+    constructor(
+        private readonly viewState: ViewState,
+        private readonly commandBus: CommandBus
+    ) { }
 
     onSelectAggregate = (fork: number, aggregate: WorkflowAggregate, mouseEvent: MouseEvent): void => {
         this.viewState.selectedAggregate[fork] = aggregate;
@@ -24,14 +26,25 @@ export class TreeComponent {
         mouseEvent.stopPropagation();
     }
 
-    updateProperty(fork: number, aggregate: WorkflowAggregate, propertyKey: string, newValue: string) {
-        console.log(fork, aggregate, propertyKey, newValue);
+    updateProperty(forkId: number, aggregate: WorkflowAggregate, propertyKey: string, newValue: string) {
+        console.log(forkId, aggregate, propertyKey, newValue);
         const command = new UpdatePropertyCommand(aggregate.getHash(), propertyKey, newValue);
-        this.commandBus.executeCommand(fork, command);
+        this.commandBus.executeCommand(forkId, command);
     }
 
-    deleteAggregate = (fork: number, aggregateHash: string): void => {
+    deleteAggregate = (forkId: number, aggregateHash: string): void => {
         const command = new DeleteWorkflowAggregateCommand(aggregateHash);
-        this.commandBus.executeCommand(fork, command);
+        this.commandBus.executeCommand(forkId, command);
+        this.viewState.clearSelectedAggregates(forkId);
     }
+
+    onDragStart = ($event: any, draggingAggregate: WorkflowAggregate) => {
+        console.log($event, draggingAggregate);
+        this.viewState.setDraggedAggregate(draggingAggregate);
+    }
+
+    // onDragEnd = ($event: any, draggingAggregate: WorkflowAggregate) => { // TODO:  May not be needed????
+    //     console.log($event, draggingAggregate);
+    //     this.viewState.setDraggedAggregate(undefined);
+    // }
 }

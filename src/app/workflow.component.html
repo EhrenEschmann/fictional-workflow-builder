@@ -59,7 +59,7 @@
 <p-splitButton icon="fa-add" (onClick)="addRandomAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])" 
     label="Add Random Aggregate" [model]="availableAggregates">
 </p-splitButton>
-<p-dropdown [options]="getCommandTitles(getForkNum())" ></p-dropdown>
+<p-dropdown [options]="getCommandTitles(getForkNum())" [style]="{'width':'250px'}"></p-dropdown>
 <!--<select>
   <option *ngFor="let commandTitle of getCommandTitles(getForkNum())" value="{{commandTitle}}">
      {{commandTitle}}

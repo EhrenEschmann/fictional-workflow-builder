@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
-import { DialogModule, ButtonModule, SplitButtonModule, InputTextModule, DropdownModule } from 'primeng/primeng';
+import { DialogModule, ButtonModule, SplitButtonModule, InputTextModule, DropdownModule, DragDropModule } from 'primeng/primeng';
 
 import { AppComponent } from './app.component';
 import { WorkflowComponent } from './workflow.component';
@@ -38,7 +38,7 @@ const appRoutes: Routes = [
 
 @NgModule({
   imports: [BrowserModule, FormsModule, RouterModule.forRoot(appRoutes), DialogModule,
-    ButtonModule, SplitButtonModule, InputTextModule, DropdownModule],
+    ButtonModule, SplitButtonModule, InputTextModule, DropdownModule, DragDropModule],
   declarations: [AppComponent, WorkflowComponent, TreeComponent, TreeNodeComponent,
     PropertyEditorComponent, ValuesPipe],
   bootstrap: [AppComponent],

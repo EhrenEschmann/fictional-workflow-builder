@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { WorkflowAggregate } from './models/domain/workflow-aggregates/workflowAggregate';
 import { ViewState } from './services/view-state.service';
+import { MoveWorkflowAggregateToTargetCommand } from './models/commands/moveWorkflowAggregateToTargetCommand';
+import { CommandBus } from './services/command-bus.service';
 
 @Component({
     selector: 'fwb-tree-node',
@@ -10,7 +12,10 @@ export class TreeNodeComponent implements OnInit {
     @Input() fork: number;
     @Input() aggregate: WorkflowAggregate;
 
-    constructor(private readonly viewState: ViewState) { }
+    constructor(
+        private readonly viewState: ViewState,
+        private readonly commandBus: CommandBus
+    ) { }
 
     aggregateEvents = (): Array<string> => {
         return Object.keys(this.aggregate.events);
@@ -26,5 +31,15 @@ export class TreeNodeComponent implements OnInit {
 
     ngOnInit() {
         console.log(this.aggregate);
+    }
+
+    onDrop = (aggregate: WorkflowAggregate, eventName: string, $event: any) => {
+        const draggingAggregate = this.viewState.draggedAggregate;
+
+        if(aggregate === draggingAggregate) return;
+        // prevent dropping parent as child
+
+        let command = new MoveWorkflowAggregateToTargetCommand(aggregate.getHash(), eventName, draggingAggregate.getHash());
+        this.commandBus.executeCommand(this.fork, command);
     }
 }

@@ -6,6 +6,8 @@ export class ViewState {
   selectedAggregate: Array<WorkflowAggregate>;
   selectedEvent: Array<string>;
 
+  draggedAggregate: WorkflowAggregate;
+
   constructor() {
     this.selectedAggregate = [];
     this.selectedEvent = [];
@@ -14,5 +16,9 @@ export class ViewState {
   clearSelectedAggregates = (fork: number) => {
     this.selectedAggregate[fork] = undefined;
     this.selectedEvent[fork] = undefined;
+  }
+
+  setDraggedAggregate = (aggregate: WorkflowAggregate) => {
+    this.draggedAggregate = aggregate;
   }
 }

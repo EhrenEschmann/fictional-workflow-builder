@@ -1,7 +1,9 @@
-<ul>
-    <li *ngFor="let eventName of aggregateEvents()" (click)="onSelectAggregate(fork, aggregate, eventName, $event)" style="border: 1px burlywood dashed"
-        [style.background]="aggregate==viewState.selectedAggregate[fork] && eventName == viewState.selectedEvent[fork] ? 'red' : white">
+<table>
+    <tr *ngFor="let eventName of aggregateEvents()" (click)="onSelectAggregate(fork, aggregate, eventName, $event)" style="border: 1px burlywood dashed"
+        [style.background]="aggregate==viewState.selectedAggregate[fork] && eventName == viewState.selectedEvent[fork] ? 'lime' : white" pDroppable="workflow" (onDrop)="onDrop(aggregate, eventName, $event)">
         <span>{{eventName}} -</span>
-        <fwb-tree [aggregates]="aggregate.events[eventName]" [fork]="fork"></fwb-tree>
-    </li>
-</ul>
+        <td style="border: 1px darkorchid dashed">
+            <fwb-tree [aggregates]="aggregate.events[eventName]" [fork]="fork"></fwb-tree>
+        </td>
+    </tr>
+</table>
