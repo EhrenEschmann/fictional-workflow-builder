@@ -19,4 +19,4 @@ export class ExecuteCompiledBinaryWorkflowAggregate extends WorkflowAggregate {
     }
 }
 
-TypeStore.put(ExecuteCompiledBinaryWorkflowAggregate.prototype.constructor.name, ExecuteCompiledBinaryWorkflowAggregate);
+TypeStore.put(ExecuteCompiledBinaryWorkflowAggregate);

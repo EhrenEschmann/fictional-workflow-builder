@@ -1,37 +1,33 @@
 import { Injectable } from '@angular/core';
-import { CommandFork } from '../models/command-domain/commandFork';
+import { CommandReality } from '../models/command-domain/commandReality';
 import { Command } from '../models/commands/command';
 
 @Injectable()
 export class CommandStore {
-  private workflow: CommandFork; // root of tree
+  private workflow: CommandReality; // root of tree
 
   constructor() { }
 
   startMainLine = (): void => {
-    this.workflow = new CommandFork(0);
+    this.workflow = new CommandReality(0);
   }
 
-  loadFork = (workflowForks: Array<CommandFork>): void => {
-    // this.workflow = workflowForks;
-  }
-
-  private find(workflow: CommandFork, fork: number): CommandFork {
-    if (workflow.getId() === fork) return workflow;
-    let foundFork: CommandFork;
+  private find(workflow: CommandReality, realityId: number): CommandReality {
+    if (workflow.getId() === realityId) return workflow;
+    let foundReality: CommandReality;
     for (let child of workflow.getChildren()) {
-      foundFork = this.find(child, fork);
-      if (foundFork)
-        return foundFork;
+      foundReality = this.find(child, realityId);
+      if (foundReality)
+        return foundReality;
     }
     return undefined;
   }
 
-  findFork = (fork: number): CommandFork => {
-    return this.find(this.workflow, fork);
+  findReality = (realityId: number): CommandReality => {
+    return this.find(this.workflow, realityId);
   }
 
-  private countChildren(workflow: CommandFork): number {
+  private countChildren(workflow: CommandReality): number {
     if (!workflow.getChildren()) return 0;
     let sum = 0;
     for (let child of workflow.getChildren()) {
@@ -44,40 +40,39 @@ export class CommandStore {
     return this.countChildren(this.workflow) + 1;
   }
 
-  fork = (fromFork: number): number => {
-    let fork = this.findFork(fromFork);
+  fork = (fromRealityId: number): number => {
+    let reality = this.findReality(fromRealityId);
     let newId = this.getSize();
-    // fork.setUndoLimit();
-    let newArchive = fork.getArchive().concat(fork.getCurrent());
-    fork.addChild(new CommandFork(newId, newArchive, fork));
+    let newArchive = reality.getArchive().concat(reality.getCurrent());
+    reality.addChild(new CommandReality(newId, newArchive, reality));
     return newId;
   }
 
-  storeCommand = (fork: number, command: Command): void => {
-    this.findFork(fork).storeCommand(command);
+  storeCommand = (realityId: number, command: Command): void => {
+    this.findReality(realityId).storeCommand(command);
   }
 
-  undo = (fork: number): Command => {
-    return this.findFork(fork).getUndoCommand();
+  undo = (realityId: number): Command => {
+    return this.findReality(realityId).getUndoCommand();
   }
 
-  redo = (fork: number): Command => {
-    return this.findFork(fork).getRedoCommand();
+  redo = (realityId: number): Command => {
+    return this.findReality(realityId).getRedoCommand();
   }
 
-  getCommandCount = (fork: number): number => {
-    return this.findFork(fork).getCurrentLength();
+  getCommandCount = (realityId: number): number => {
+    return this.findReality(realityId).getCurrentLength();
   }
 
-  getRedoCount = (fork: number): number => {
-    return this.findFork(fork).getRedoLength();
+  getRedoCount = (realityId: number): number => {
+    return this.findReality(realityId).getRedoLength();
   }
 
-  getCurrent = (fork: number): Array<Command> => {
-    return this.findFork(fork).getCurrent();
+  getCurrent = (realityId: number): Array<Command> => {
+    return this.findReality(realityId).getCurrent();
   }
 
-  // getArchiveTitles = (fork: number): Array<string> => {
-  //   return this.getArchive(fork).map((command: Command) => command.title);
+  // getArchiveTitles = (realityId: number): Array<string> => {
+  //   return this.getArchive(realityId).map((command: Command) => command.title);
   // }
 }

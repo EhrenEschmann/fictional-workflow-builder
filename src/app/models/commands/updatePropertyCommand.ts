@@ -17,16 +17,16 @@ export class UpdatePropertyCommand extends Command {
         public value: string
     ) { super(); }
 
-    execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        const target = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
+    execute = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+        const target = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         this.previousValue = target.properties[this.propertyKey].value;
         target.properties[this.propertyKey].value = this.value;
 
         this.title = `updating ${this.targetHash}'s ${this.propertyKey} value from ${this.previousValue} to ${this.value}`;
     }
 
-    undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        const target = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
+    undo = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+        const target = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         target.properties[this.propertyKey].value = this.previousValue;
     }
 
@@ -56,4 +56,4 @@ export class UpdatePropertyCommand extends Command {
     }
 }
 
-TypeStore.put(UpdatePropertyCommand.prototype.constructor.name, UpdatePropertyCommand);
+TypeStore.put(UpdatePropertyCommand);

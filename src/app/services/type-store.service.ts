@@ -6,7 +6,8 @@ export class TypeStore {
 
     private static types: Dictionary<any> = {};
 
-    static put = (stringType: string, type: any) => {
+    static put = (type: any) => {
+        const stringType: string = type.prototype.constructor.name;
         console.log(`Adding ${stringType} to dictionary`);
         TypeStore.types[stringType] = type;
     }

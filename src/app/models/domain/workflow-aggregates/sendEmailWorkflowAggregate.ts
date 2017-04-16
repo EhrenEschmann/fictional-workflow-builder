@@ -20,4 +20,4 @@ export class SendEmailWorkflowAggregate extends WorkflowAggregate {
     }
 }
 
-TypeStore.put(SendEmailWorkflowAggregate.prototype.constructor.name, SendEmailWorkflowAggregate);
+TypeStore.put(SendEmailWorkflowAggregate);

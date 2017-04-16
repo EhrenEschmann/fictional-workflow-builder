@@ -3,7 +3,7 @@ import { CommandStore } from './command-store.service';
 import { CommandBus } from './command-bus.service';
 import { DomainStore } from './domain-store.service';
 import { DomainCache } from './domain-cache.service';
-import { CommandFork } from '../models/command-domain/commandFork';
+import { CommandReality } from '../models/command-domain/commandReality';
 import { Command } from '../models/commands/command';
 import { CommandOptimizer } from './command-optimizer.service';
 import { CommandConflict } from '../models/command-domain/commandConflict';
@@ -35,42 +35,42 @@ export class WorkflowManager {
         // var 
     }
 
-    canUndo = (forkId: number): boolean => {
-        let fork = this.commandStore.findFork(forkId);
+    canUndo = (realityId: number): boolean => {
+        let reality = this.commandStore.findReality(realityId);
 
-        return fork.getUndoLength() === 0;
+        return reality.getUndoLength() === 0;
     }
 
-    canRedo = (forkId: number): boolean => {
-        let fork = this.commandStore.findFork(forkId);
+    canRedo = (realityId: number): boolean => {
+        let reality = this.commandStore.findReality(realityId);
 
-        return fork.getRedoLength() === 0;
+        return reality.getRedoLength() === 0;
     }
 
-    forkWorkflow = (fromForkId: number) => {
-        let domainForkId = this.domainStore.fork(fromForkId);
-        let commandForkId = this.commandStore.fork(fromForkId);
-        if (domainForkId !== commandForkId) throw new Error('inconsistent domain/command fork state');
-        this.domainCache.createCache(domainForkId);
+    forkWorkflow = (fromRealityId: number) => {
+        let domainRealityId = this.domainStore.fork(fromRealityId);
+        let commandRealityId = this.commandStore.fork(fromRealityId);
+        if (domainRealityId !== commandRealityId) throw new Error('inconsistent domain/command reality state');
+        this.domainCache.createCache(domainRealityId);
 
-        let commandFork = this.commandStore.findFork(fromForkId);
-        let newArchive: Array<Command> = commandFork.getArchive().concat(commandFork.getCurrent());
+        let commandReality = this.commandStore.findReality(fromRealityId);
+        let newArchive: Array<Command> = commandReality.getArchive().concat(commandReality.getCurrent());
 
         for (let command of newArchive) {
             try {
-                this.commandBus.executeCommand(domainForkId, command, true);
+                this.commandBus.executeCommand(domainRealityId, command, true);
             } catch (e) {
                 console.log(`Error:  ${e}`);
             }
         }
     }
 
-    optimize = (forkId: number): void => {
-        let originalCommands = this.commandBus.getFork(forkId).getCurrent();
+    optimize = (realityId: number): void => {
+        let originalCommands = this.commandBus.getReality(realityId).getCurrent();
 
         for (let originalCommand of originalCommands) {
             try {
-                this.commandBus.undoCommand(forkId, 1); // go 1 at a time in case there are errors.
+                this.commandBus.undoCommand(realityId, 1); // go 1 at a time in case there are errors.
             } catch (e) {
                 console.log(`Error:  ${e}`);
             }
@@ -82,7 +82,7 @@ export class WorkflowManager {
         let warnings: Array<string> = []; // todo make type warning???
         for (let command of optimizedStack) {
             try {
-                this.commandBus.executeCommand(forkId, command);
+                this.commandBus.executeCommand(realityId, command);
             } catch (e) {
                 warnings.push(e);
                 console.log(`Error:  ${e}`);
@@ -91,77 +91,77 @@ export class WorkflowManager {
         console.log('completed with warnings: ' + warnings);
     }
 
-    postOrderMergeUpWorkflow = (fromFork: CommandFork, toForkId: number) => {
-        let toFork = this.commandStore.findFork(toForkId);
-        let fromCommands = fromFork.getCurrent();
-        let toCommands = toFork.getCurrent();
+    postOrderMergeUpWorkflow = (fromReality: CommandReality, toRealityId: number) => {
+        let toReality = this.commandStore.findReality(toRealityId);
+        let fromCommands = fromReality.getCurrent();
+        let toCommands = toReality.getCurrent();
 
         let allCommands = toCommands.concat(fromCommands);
 
-        // clear and rebuild toFork from archive
-        this.commandBus.clearCurrent(toForkId);
+        // clear and rebuild toReality from archive
+        this.commandBus.clearCurrent(toRealityId);
 
-        // clear and rebuild toFork from ~~NEW~~ archive
-        this.commandBus.clear(fromFork.getId());
+        // clear and rebuild toReality from ~~NEW~~ archive
+        this.commandBus.clear(fromReality.getId());
 
         // This command modifies the original commands; all prep work must be done before this.
         allCommands = this.commandOptimizer.optimize(allCommands);
 
         for (let command of allCommands) {
             try {
-                this.commandBus.executeCommand(toForkId, command);
-                // this.commandBus.executeCommand(fromFork.getId(), command, true);
+                this.commandBus.executeCommand(toRealityId, command);
+                // this.commandBus.executeCommand(fromReality.getId(), command, true);
             } catch (e) {
                 console.log(`Error:  ${e}`);
             }
         }
 
-        let newArchive = toFork.getArchive().concat(toFork.getCurrent());
+        let newArchive = toReality.getArchive().concat(toReality.getCurrent());
         for (let command of newArchive) {
             try {
-                this.commandBus.executeCommand(fromFork.getId(), command, true);
+                this.commandBus.executeCommand(fromReality.getId(), command, true);
             } catch (e) {
                 console.log(`Error:  ${e}`);
             }
         }
-        fromFork.setArchive(newArchive);
+        fromReality.setArchive(newArchive);
     }
 
-    getConflicts = (fromFork: CommandFork, toFork: CommandFork): Array<CommandConflict> => {
-        return this.commandOptimizer.getConflicts(fromFork.getCurrent(), toFork.getCurrent());
+    getConflicts = (fromReality: CommandReality, toReality: CommandReality): Array<CommandConflict> => {
+        return this.commandOptimizer.getConflicts(fromReality.getCurrent(), toReality.getCurrent());
     }
 
-    mergeDown = (forkId: number) => {
+    mergeDown = (realityId: number) => {
         // 1. optimize
-        this.optimize(forkId);
+        this.optimize(realityId);
 
         // 2. Get fork
-        const fork = this.commandBus.getFork(forkId);
+        const reality = this.commandBus.getReality(realityId);
 
         // 3. get commands
-        let commands = fork.getArchive().concat(fork.getCurrent());
+        let commands = reality.getArchive().concat(reality.getCurrent());
         commands = this.commandOptimizer.optimize(commands);
 
         // 4. Get children forks
-        const childrenForks = fork.getChildren();
+        const childrenRealities = reality.getChildren();
 
         // loop over each child, perform merge up
-        for (let childFork of childrenForks) {
-            let childForkId = childFork.getId();
-            // this.optimize(childForkId);
+        for (let childReality of childrenRealities) {
+            let childRealityId = childReality.getId();
+            // this.optimize(childrenRealities);
 
-            let originalCommands = childFork.getCurrent();
+            let originalCommands = childReality.getCurrent();
 
-            this.commandBus.clear(childFork.getId());
+            this.commandBus.clear(childReality.getId());
 
             for (let command of commands) {
-                this.commandBus.executeCommand(childForkId, command, true); // TODO:  try/catch this???  
+                this.commandBus.executeCommand(childRealityId, command, true); // TODO:  try/catch this???  
             }
-            childFork.setArchive(commands);
+            childReality.setArchive(commands);
 
             for (let originalCommand of originalCommands) {
                 try {
-                    this.commandBus.executeCommand(childForkId, originalCommand); // go 1 at a time in case there are errors.
+                    this.commandBus.executeCommand(childRealityId, originalCommand); // go 1 at a time in case there are errors.
                 } catch (e) {
                     console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
                 }
@@ -169,19 +169,19 @@ export class WorkflowManager {
         }
     }
 
-    clearCurrent = (forkId: number) => {
-        this.commandBus.clearCurrent(forkId);
+    clearCurrent = (realityId: number) => {
+        this.commandBus.clearCurrent(realityId);
     }
 
-     clearAll = (forkId: number) => {
-         this.commandBus.clear(forkId);
+     clearAll = (realityId: number) => {
+         this.commandBus.clear(realityId);
      }
 
     isLoaded = (): boolean => {
         return this.domainStore.isLoaded();
     }
 
-    deleteFork = (forkId: number): void => {
-        this.domainStore.getForks()[forkId] = undefined;
+    deleteReality = (realityId: number): void => {
+        this.domainStore.getRealities()[realityId] = undefined;
     }
 }

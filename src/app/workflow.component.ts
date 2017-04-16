@@ -26,6 +26,10 @@ export class WorkflowComponent implements OnInit {
     private mergeDialogDisplayed: boolean = false;
     private availableAggregates: Array<any>;
 
+
+    private commandTitles: Array<Object> = [];
+    private conflicts: Array<CommandConflict> = []; // This can be it's own component
+
     constructor(
         private readonly hashGenerator: HashGenerator,
         private readonly workflowManager: WorkflowManager,
@@ -39,152 +43,151 @@ export class WorkflowComponent implements OnInit {
             {
                 label: 'Execute Compiled Binary',
                 command: () => {
-                    const forkId = this.getForkNum();
-                    this.addAggregate(forkId, this.viewState.selectedAggregate[forkId],
-                        this.viewState.selectedEvent[forkId], 'ExecuteCompiledBinaryWorkflowAggregate');
+                    const realityId = this.getRealityId();
+                    this.addAggregate(realityId, this.viewState.selectedAggregate[realityId],
+                        this.viewState.selectedEvent[realityId], 'ExecuteCompiledBinaryWorkflowAggregate');
                 }
             },
             {
                 label: 'Post Rest Api',
                 command: () => {
-                    const forkId = this.getForkNum();
-                    this.addAggregate(forkId, this.viewState.selectedAggregate[forkId],
-                        this.viewState.selectedEvent[forkId], 'PostRestApiWorkflowAggregate');
+                    const realityId = this.getRealityId();
+                    this.addAggregate(realityId, this.viewState.selectedAggregate[realityId],
+                        this.viewState.selectedEvent[realityId], 'PostRestApiWorkflowAggregate');
                 }
             }, {
                 label: 'Send Email',
                 command: () => {
-                    const forkId = this.getForkNum();
-                    this.addAggregate(forkId, this.viewState.selectedAggregate[forkId],
-                        this.viewState.selectedEvent[forkId], 'SendEmailWorkflowAggregate');
+                    const realityId = this.getRealityId();
+                    this.addAggregate(realityId, this.viewState.selectedAggregate[realityId],
+                        this.viewState.selectedEvent[realityId], 'SendEmailWorkflowAggregate');
                 }
             }
         ];
     }
 
-    canUndo = (forkId: number): boolean => {
-        return this.workflowManager.canUndo(forkId);
+    canUndo = (realityId: number): boolean => {
+        return this.workflowManager.canUndo(realityId);
     }
 
-    undo = (fork: number, count: number): void => {
-        this.commandBus.undoCommand(fork, count);
-        this.viewState.clearSelectedAggregates(fork);
+    undo = (realityId: number, count: number): void => {
+        this.commandBus.undoCommand(realityId, count);
+        this.viewState.clearSelectedAggregates(realityId);
     }
 
-    getParentId = (forkId: number): number => {
-        return this.queryBus.getRootObject(forkId).getParent();
+    getParentId = (realityId: number): number => {
+        return this.queryBus.getRootObject(realityId).getParent();
     }
 
-    canRedo = (forkId: number): boolean => {
-        return this.workflowManager.canRedo(forkId);
+    canRedo = (realityId: number): boolean => {
+        return this.workflowManager.canRedo(realityId);
     }
 
-    redo = (fork: number, count: number): void => {
-        this.commandBus.redoCommand(fork, count);
+    redo = (realityId: number, count: number): void => {
+        this.commandBus.redoCommand(realityId, count);
     }
 
-    getForkNum = (): number => {
-        return this.workflow.getForkId();
+    getRealityId = (): number => {
+        return this.workflow.getRealityId();
     }
 
-    addRandomAggregate = (fork: number, parent: WorkflowAggregate, event: string): void => {
+    addRandomAggregate = (realityId: number, parent: WorkflowAggregate, event: string): void => {
         const random = Math.floor(Math.random() * 3);
         this.availableAggregates[random].command();
     }
 
-    addAggregate = (fork: number, parent: WorkflowAggregate, event: string, aggregateType: string): void => {
+    addAggregate = (realityId: number, parent: WorkflowAggregate, event: string, aggregateType: string): void => {
         let createCommand = new CreateNewWorkflowAggregateCommand(aggregateType, this.hashGenerator.createHash());
         let moveCommand = (parent && event)
             ? new MoveWorkflowAggregateToTargetCommand(parent.getHash(), event)
             : new MoveWorkflowAggregateToRootCommand();
 
         createCommand.updateCommands.push(moveCommand);
-        this.commandBus.executeCommand(fork, createCommand);
+        this.commandBus.executeCommand(realityId, createCommand);
     }
 
     getRootAggregates = (): Array<WorkflowAggregate> => {
-        let forkId = this.getForkNum();
-        if (this.queryBus.getRootObject(forkId))
-            return this.queryBus.getRootObject(forkId).rootAggregate();
+        let realityId = this.getRealityId();
+        if (this.queryBus.getRootObject(realityId))
+            return this.queryBus.getRootObject(realityId).rootAggregate();
     }
 
-    fork = (forkFrom: number) => {
-        this.workflowManager.optimize(forkFrom);
-        this.workflowManager.forkWorkflow(forkFrom);
+    fork = (fromRealityId: number) => {
+        this.workflowManager.optimize(fromRealityId);
+        this.workflowManager.forkWorkflow(fromRealityId);
     }
 
-    selectAggregate = (fork: number, aggregate: WorkflowAggregate, event: string): void => {
-        this.viewState.selectedAggregate[fork] = aggregate;
-        this.viewState.selectedEvent[fork] = event;
+    selectAggregate = (realityId: number, aggregate: WorkflowAggregate, event: string): void => {
+        this.viewState.selectedAggregate[realityId] = aggregate;
+        this.viewState.selectedEvent[realityId] = event;
     }
 
-    getChildrenForks = (): Array<Workflow> => {
+    getChildrenRealities = (): Array<Workflow> => {
         return this.queryBus.getRootObjects().filter((workflow: Workflow) => {
-            return workflow.getParent() === this.getForkNum();
+            return workflow.getParent() === this.getRealityId();
         });
     }
 
-    attemptMergeUp = (forkId: number) => {
-        this.updateConflicts(forkId);
+    attemptMergeUp = (realityId: number) => {
+        this.updateConflicts(realityId);
         if (this.conflicts.length > 0) {
             this.mergeDialogDisplayed = true;
         } else {
-            this.mergeUp(forkId);
+            this.mergeUp(realityId);
         }
     }
 
-    mergeUp = (forkId: number) => {
-        let fork = this.commandBus.getFork(forkId);
-        this.workflowManager.postOrderMergeUpWorkflow(fork, fork.getParent().getId());
-        this.viewState.clearSelectedAggregates(forkId);
+    mergeUp = (realityId: number) => {
+        let reality = this.commandBus.getReality(realityId);
+        this.workflowManager.postOrderMergeUpWorkflow(reality, reality.getParent().getId());
+        this.viewState.clearSelectedAggregates(realityId);
 
-        // this.workflowManager.deleteFork(forkId);
+        // this.workflowManager.deleteFork(forkId);  // TODO:  flag on fork preventing display?, then we would have to
+        //                                                  pass-through merges to parent.
     }
 
-    private conflicts: Array<CommandConflict> = [];
-    updateConflicts = (forkId: number): void => {
-        const fork = this.commandBus.getFork(forkId);
-        this.conflicts = this.workflowManager.getConflicts(fork, fork.getParent());
+    updateConflicts = (realityId: number): void => {
+        const reality = this.commandBus.getReality(realityId);
+        this.conflicts = this.workflowManager.getConflicts(reality, reality.getParent());
     }
 
-    mergeDown = (forkId: number): void => {
-        this.workflowManager.mergeDown(forkId);
-        this.viewState.clearSelectedAggregates(forkId);
+    mergeDown = (realityId: number): void => {
+        this.workflowManager.mergeDown(realityId);
+        this.viewState.clearSelectedAggregates(realityId);
     }
 
-    commandTitles: Array<Object> = [];
-    getCommandTitles = (forkId: number): Array<Object> => {
-        let current = this.commandBus.getCurrentCommandTitles(forkId);
+    getCommandTitles = (realityId: number): Array<Object> => {
+        let current = this.commandBus.getCurrentCommandTitles(realityId);
 
         if (current.length > this.commandTitles.length) {
             const toAdd = current.slice(this.commandTitles.length, current.length);
             this.commandTitles = this.commandTitles.concat(toAdd.map((str) => { return { 'label': str }; }));
-        } else if(current.length < this.commandTitles.length) {
+        } else if (current.length < this.commandTitles.length) {
             this.commandTitles = current.map((str) => { return { 'label': str }; });
         }
         return this.commandTitles;
     }
 
-    getStackLengths = (forkId: number): Array<number> => {
-        const fork = this.commandBus.getFork(forkId);
-        return [fork.getArchive().length, fork.getCurrent().length];
+    getStackLengths = (realityId: number): Array<number> => {
+        const reality = this.commandBus.getReality(realityId);
+        return [reality.getArchive().length, reality.getCurrent().length];
     }
 
-    clear = (forkId: number) => {
-        this.workflowManager.clearCurrent(forkId);
-        this.viewState.clearSelectedAggregates(forkId);
+    clear = (realityId: number) => {
+        this.workflowManager.clearCurrent(realityId);
+        this.viewState.clearSelectedAggregates(realityId);
     }
 
-    optimize = (forkId: number) => {
-        this.workflowManager.optimize(forkId);
-        this.viewState.clearSelectedAggregates(forkId);
+    optimize = (realityId: number) => {
+        this.workflowManager.optimize(realityId);
+        this.viewState.clearSelectedAggregates(realityId);
     }
 
     resolveConflict = (conflict: CommandConflict, resolution: Resolution): void => {
-        const fromForkId = this.getForkNum();
+        const fromRealityId = this.getRealityId();
 
         if (resolution === Resolution.Parent) {
-            this.commandBus.executeCommand(fromForkId, conflict.toCommand);
+            this.commandBus.executeCommand(fromRealityId, conflict.toCommand);
         }
         // If we chose the child, it would get applied after and overwrite when the merge is complete
         // else if (resolution === Resolution.Child) {

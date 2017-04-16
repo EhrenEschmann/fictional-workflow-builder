@@ -12,20 +12,20 @@ export class QueryBus {
     private readonly domainCache: DomainCache
   ) { }
 
-  getRootObject = (fork: number): Workflow => {
-    return this.domainStore.getWorkflow(fork);
+  getRootObject = (realityId: number): Workflow => {
+    return this.domainStore.getWorkflow(realityId);
   }
 
   getRootObjects = (): Array<Workflow> => {
-    return this.domainStore.getForks();
+    return this.domainStore.getRealities();
   }
 
-  getTypedAggregateRoot = <T>(fork: number, hash: string): T => {
+  getTypedAggregateRoot = <T>(realityId: number, hash: string): T => {
     throw new Error('Not Built Yet.');
   }
 
-  getAggregateRoot = (fork: number, hash: string): AggregateRoot => {
-    return this.domainCache.get(fork, hash);
+  getAggregateRoot = (realityId: number, hash: string): AggregateRoot => {
+    return this.domainCache.get(realityId, hash);
   }
 
   query = (target: AggregateRoot, query: Array<string>): any => {

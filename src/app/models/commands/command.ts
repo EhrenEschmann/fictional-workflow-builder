@@ -6,8 +6,8 @@ export abstract class Command {
 
   title: string = 'Command Executed';
   abstract aggregateHash: () => string;
-  abstract execute: (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
-  abstract undo: (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
+  abstract execute: (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
+  abstract undo: (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
   abstract getValue: () => string;
 
   abstract type: CommandType;

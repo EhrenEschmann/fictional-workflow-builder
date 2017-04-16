@@ -4,15 +4,17 @@ export class Workflow {
 
     private root: Array<WorkflowAggregate>;
 
-    constructor(private readonly forkId: number,
-        private readonly forkFrom: number,
-        private name?: string) {
+    constructor(
+        private readonly realityId: number,
+        private readonly fromRealityId: number,
+        private name?: string
+    ) {
         this.name = name;
         this.root = [];
     }
 
-    getForkId = () => {
-        return this.forkId;
+    getRealityId = () => {
+        return this.realityId;
     }
 
     getName = () => {
@@ -28,6 +30,6 @@ export class Workflow {
     }
 
     getParent = (): number => {
-        return this.forkFrom;
+        return this.fromRealityId;
     }
 }

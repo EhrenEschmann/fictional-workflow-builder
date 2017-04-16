@@ -1,22 +1,22 @@
 import { CommandStack } from './commandStack';
 import { Command } from '../commands/command';
 
-export class CommandFork {
+export class CommandReality {
 
     private commands: CommandStack;
-    private childrenForks: Array<CommandFork>;
+    private childrenRealities: Array<CommandReality>;
     private undoLimit: number = 0;
     // private merged: boolean;
 
     constructor(
         private readonly id: number,
         private archive?: Array<Command>,
-        private parentFork?: CommandFork
+        private parentReality?: CommandReality
     ) {
         if (!this.archive)
             this.archive = [];
         this.commands = new CommandStack();
-        this.childrenForks = [];
+        this.childrenRealities = [];
         // this.merged = false;
     }
 
@@ -32,21 +32,16 @@ export class CommandFork {
         return this.id;
     }
 
-    addChild = (fork: CommandFork): void => {
-        this.childrenForks.push(fork);
+    addChild = (reality: CommandReality): void => {
+        this.childrenRealities.push(reality);
     }
 
-    getParent = (): CommandFork => {
-        return this.parentFork;
+    getParent = (): CommandReality => {
+        return this.parentReality;
     }
-    // Parent never changes.
-    // setParent = (newParent: CommandFork): void => {
-    //     this.start = this.start + newParent.getStart();
-    //     this.parentFork = newParent;
-    // }
 
-    getChildren = (): Array<CommandFork> => {
-        return this.childrenForks;
+    getChildren = (): Array<CommandReality> => {
+        return this.childrenRealities;
     }
 
     getArchive = (): Array<Command> => {

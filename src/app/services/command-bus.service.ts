@@ -3,7 +3,7 @@ import { QueryBus } from './query-bus.service';
 import { CommandStore } from './command-store.service';
 import { AggregateFactory } from './aggregate-factory.service';
 import { Command } from '../models/commands/command';
-import { CommandFork } from '../models/command-domain/commandFork';
+import { CommandReality } from '../models/command-domain/commandReality';
 
 @Injectable()
 export class CommandBus {
@@ -14,59 +14,59 @@ export class CommandBus {
         private readonly queryBus: QueryBus
     ) { }
 
-    executeCommand = (fork: number, command: Command, ignorePersist?: boolean): void => {
-        command.execute(fork, this.queryBus, this.aggregateFactory);
+    executeCommand = (realityId: number, command: Command, ignorePersist?: boolean): void => {
+        command.execute(realityId, this.queryBus, this.aggregateFactory);
         if (!ignorePersist)
-            this.commandStore.storeCommand(fork, command);
+            this.commandStore.storeCommand(realityId, command);
     }
 
-    undoCommand = (fork: number, count = 1): void => {
+    undoCommand = (realityId: number, count = 1): void => {
         for (let i = 0; i < count; i++) {
-            const command = this.commandStore.undo(fork);
-            command.undo(fork, this.queryBus, this.aggregateFactory);
+            const command = this.commandStore.undo(realityId);
+            command.undo(realityId, this.queryBus, this.aggregateFactory);
         }
     }
 
-    redoCommand = (fork: number, count: number): void => {
+    redoCommand = (realityId: number, count: number): void => {
         for (let i = 0; i < count; i++) {
-            const command = this.commandStore.redo(fork);
-            command.execute(fork, this.queryBus, this.aggregateFactory);
+            const command = this.commandStore.redo(realityId);
+            command.execute(realityId, this.queryBus, this.aggregateFactory);
         }
     }
 
-    getCommandCount = (fork: number): number => {
-        return this.commandStore.getCommandCount(fork);
+    getCommandCount = (realityId: number): number => {
+        return this.commandStore.getCommandCount(realityId);
     }
 
-    getRedoCount = (fork: number): number => {
-        return this.commandStore.getRedoCount(fork);
+    getRedoCount = (realityId: number): number => {
+        return this.commandStore.getRedoCount(realityId);
     }
 
-    getCurrentCommandTitles = (fork: number): Array<string> => {
-        return this.commandStore.getCurrent(fork)
+    getCurrentCommandTitles = (realityId: number): Array<string> => {
+        return this.commandStore.getCurrent(realityId)
             .map((command: Command) => command.title);
     }
 
-    getFork = (fork: number): CommandFork => {
-        return this.commandStore.findFork(fork);
+    getReality = (realityId: number): CommandReality => {
+        return this.commandStore.findReality(realityId);
     }
 
-    private clearArchive(forkId: number): void {
-        const archive = this.getFork(forkId).getArchive();
+    private clearArchive(realityId: number): void {
+        const archive = this.getReality(realityId).getArchive();
         for (let i = archive.length - 1; i >= 0; i--) {
-            archive[i].undo(forkId, this.queryBus, this.aggregateFactory);
+            archive[i].undo(realityId, this.queryBus, this.aggregateFactory);
         }
     }
 
-    clearCurrent = (forkId: number): void => {
-        const current = this.getFork(forkId).getCurrent();
+    clearCurrent = (realityId: number): void => {
+        const current = this.getReality(realityId).getCurrent();
         for (let i = 0; i < current.length; i++) {
-            this.undoCommand(forkId);
+            this.undoCommand(realityId);
         }
     }
 
-    clear = (forkId: number): void => {
-        this.clearCurrent(forkId);
-        this.clearArchive(forkId);
+    clear = (realityId: number): void => {
+        this.clearCurrent(realityId);
+        this.clearArchive(realityId);
     }
 }

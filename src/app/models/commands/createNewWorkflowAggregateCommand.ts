@@ -15,22 +15,22 @@ export class CreateNewWorkflowAggregateCommand extends Command {
         public updateCommands: Array<FutureTargetSettableCommand> = []
     ) { super(); }
 
-    execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        aggregateFactory.createAggregateByType(this.aggregateType, fork, this.targetHash);
+    execute = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+        aggregateFactory.createAggregateByType(this.aggregateType, realityId, this.targetHash);
 
         for (let command of this.updateCommands) {
             command.setTarget(this.targetHash);
-            command.execute(fork, queryBus, aggregateFactory);
+            command.execute(realityId, queryBus, aggregateFactory);
         }
 
         this.title = `Creating new ${this.aggregateType} ${this.targetHash}`;
     }
 
-    undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+    undo = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
         for (let j = this.updateCommands.length - 1; j >= 0; j--) {
-            this.updateCommands[j].undo(fork, queryBus, aggregateFactory);
+            this.updateCommands[j].undo(realityId, queryBus, aggregateFactory);
         }
-        aggregateFactory.invalidateCache(fork, this.targetHash);
+        aggregateFactory.invalidateCache(realityId, this.targetHash);
     }
 
     aggregateHash = (): string => {
@@ -51,4 +51,4 @@ export class CreateNewWorkflowAggregateCommand extends Command {
     }
 }
 
-TypeStore.put(CreateNewWorkflowAggregateCommand.prototype.constructor.name, CreateNewWorkflowAggregateCommand);
+TypeStore.put(CreateNewWorkflowAggregateCommand);

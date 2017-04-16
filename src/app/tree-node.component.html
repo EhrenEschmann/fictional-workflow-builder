@@ -1,9 +1,9 @@
 <table>
-    <tr *ngFor="let eventName of aggregateEvents()" (click)="onSelectAggregate(fork, aggregate, eventName, $event)" style="border: 1px burlywood dashed"
-        [style.background]="aggregate==viewState.selectedAggregate[fork] && eventName == viewState.selectedEvent[fork] ? 'lime' : white" pDroppable="workflow" (onDrop)="onDrop(aggregate, eventName, $event)">
+    <tr *ngFor="let eventName of aggregateEvents()" (click)="onSelectAggregate(realityId, aggregate, eventName, $event)" style="border: 1px burlywood dashed"
+        [style.background]="aggregate==viewState.selectedAggregate[realityId] && eventName == viewState.selectedEvent[realityId] ? 'lime' : white" pDroppable="workflow" (onDrop)="onDrop(aggregate, eventName, $event)">
         <span>{{eventName}} -</span>
         <td style="border: 1px darkorchid dashed">
-            <fwb-tree [aggregates]="aggregate.events[eventName]" [fork]="fork"></fwb-tree>
+            <fwb-tree [aggregates]="aggregate.events[eventName]" [realityId]="realityId"></fwb-tree>
         </td>
     </tr>
 </table>

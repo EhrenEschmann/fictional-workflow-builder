@@ -26,11 +26,11 @@ export class AppComponent {
   }
 
   activeWorkflow = (): boolean => {
-    return this.domainStore.getForks() !== undefined;
+    return this.domainStore.getRealities() !== undefined;
   }
 
-  getRootFork = (): Workflow => {
+  getRootReality = (): Workflow => {
     if (this.workflowManager.isLoaded())
-      return this.domainStore.getForks()[0];
+      return this.domainStore.getRealities()[0];
   }
 }

@@ -13,8 +13,8 @@ export class DeleteWorkflowAggregateCommand extends Command {
         public targetHash: string
     ) { super(); }
 
-    execute = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        let aggregate = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
+    execute = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+        let aggregate = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         this.originalIndex = aggregate.parent.indexOf(aggregate);
         if (this.originalIndex === -1)
             throw new Error('aggregate not part of workflow');
@@ -23,8 +23,8 @@ export class DeleteWorkflowAggregateCommand extends Command {
         this.title = `Delete ${aggregate.getHash()}`;
     }
 
-    undo = (fork: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
-        let aggregate = queryBus.getAggregateRoot(fork, this.targetHash) as WorkflowAggregate;
+    undo = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+        let aggregate = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         aggregate.parent.splice(this.originalIndex, 0, aggregate);
     }
 
@@ -44,4 +44,4 @@ export class DeleteWorkflowAggregateCommand extends Command {
     }
 }
 
-TypeStore.put(DeleteWorkflowAggregateCommand.prototype.constructor.name, DeleteWorkflowAggregateCommand);
+TypeStore.put(DeleteWorkflowAggregateCommand);

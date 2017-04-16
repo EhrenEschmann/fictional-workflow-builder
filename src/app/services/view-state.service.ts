@@ -13,9 +13,9 @@ export class ViewState {
     this.selectedEvent = [];
   }
 
-  clearSelectedAggregates = (fork: number) => {
-    this.selectedAggregate[fork] = undefined;
-    this.selectedEvent[fork] = undefined;
+  clearSelectedAggregates = (realityId: number) => {
+    this.selectedAggregate[realityId] = undefined;
+    this.selectedEvent[realityId] = undefined;
   }
 
   setDraggedAggregate = (aggregate: WorkflowAggregate) => {

@@ -52,7 +52,8 @@ export class CommandOptimizer {
                 if (partitions[hash].getParentAggregateHash() === undefined) { // signals root level aggregateCommandPartition
                     prunedPartitions[hash] = partitions[hash];
                     // } else if (prunedPartitions[partitions[hash].getParentAggregateHash()]) { <-- this is asking if a command
-                        //  exists that creates its parent, but that wont exist on nested forks who don't store their parent information.
+                        //  exists that creates its parent, but that wont exist on 
+                        // nested realities who don't store their parent information.
                 } else {
                     const parentHash = partitions[hash].getParentAggregateHash();
                     // we can only prune here if getparentHash exists and it was deleted
@@ -112,7 +113,7 @@ export class CommandOptimizer {
         for (let fromHash in fromPartitions) {
             // TODO:  Also check for moves, updates to objects that dont exist anymore in toParititions
             // TODO:  If we start with toParitions, will we have to worry about this extra case?
-            if (toPartitions[fromHash]) { // if there was a change in both forks
+            if (toPartitions[fromHash]) { // if there was a change in both realities
                 // 1.  Cant both have a create; auto-merge deletes
                 if (!fromPartitions[fromHash].deleteCommand) {
                     // TODO:  don't need to do this if there are deletes:

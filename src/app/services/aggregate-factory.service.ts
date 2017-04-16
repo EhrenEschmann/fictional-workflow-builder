@@ -10,20 +10,20 @@ export class AggregateFactory {
         private readonly domainCache: DomainCache
     ) { }
 
-    createAggregate = <T extends WorkflowAggregate>(aggregate: { new (hash: string): T; }, fork: number, hash: string): T => {
-        if (this.domainCache.get(fork, hash))
+    createAggregate = <T extends WorkflowAggregate>(aggregate: { new (hash: string): T; }, realityId: number, hash: string): T => {
+        if (this.domainCache.get(realityId, hash))
             throw new Error(`aggregate already exists at ${hash}`);
         const newAggregate = new aggregate(hash);
-        this.domainCache.insert(fork, hash, newAggregate);
+        this.domainCache.insert(realityId, hash, newAggregate);
         return newAggregate;
     }
 
-    createAggregateByType = (stringType: string, fork: number, hash: string): any => {
+    createAggregateByType = (stringType: string, realityId: number, hash: string): any => {
         const type = TypeStore.get(stringType);
-        return this.createAggregate(type, fork, hash);
+        return this.createAggregate(type, realityId, hash);
     }
 
-    invalidateCache = (fork: number, hash: string): void => {
-        this.domainCache.remove(fork, hash);
+    invalidateCache = (realityId: number, hash: string): void => {
+        this.domainCache.remove(realityId, hash);
     }
 }

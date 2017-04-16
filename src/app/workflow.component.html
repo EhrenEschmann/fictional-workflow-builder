@@ -1,15 +1,7 @@
-<p-dialog [(visible)]="mergeDialogDisplayed" *ngIf="getForkNum() !== 0">
+<p-dialog [(visible)]="mergeDialogDisplayed" *ngIf="getRealityId() !== 0">
     <p-header>
-        Merge {{getForkNum()}} down to {{workflow.getParent()}}
+        Merge {{getRealityId()}} down to {{workflow.getParent()}}
     </p-header>
-    <!--<div *ngFor="let conflict of getConflicts(getForkNum())">
-        <span> {{conflict.getAggregate()}}</span>
-        <span> {{conflict.getType()}}</span>
-        <span> {{conflict.getFromValue()}}</span>
-        <span> {{conflict.getToValue()}}</span>
-        <button (click)="resolve(conflict, Resolution.Parent)">take parent</button>
-        <button (click)="resolve(conflict, Resolution.Child)">take child</button>
-    </div>-->
     <table>
         <tr>
             <th>Aggregate</th>
@@ -38,39 +30,29 @@
         </tr>
     </table>
      <p-footer>
-        <button pButton (click)="mergeUp(getForkNum()); mergeDialogDisplayed = false" label="merge!"></button>
+        <button pButton (click)="mergeUp(getRealityId()); mergeDialogDisplayed = false" label="merge!"></button>
     </p-footer>
-    <!--TODO: Define merges here
-    <p-footer>
-        <button (click)="merge(getForkNum(), MergeType.PreOrder)">Pre Order</button>
-        <button (click)="merge(getForkNum(), MergeType.PostOrder)">Post Order</button>
-        <button (click)="merge(getForkNum(), MergeType.ByAggregate)">By Aggregate</button>
-    </p-footer>-->
 </p-dialog>
 <hr />
-<span>{{getForkNum()}}</span>
-<button pButton (click)="undo(getForkNum(), 1)" [disabled]="canUndo(getForkNum())"label="Undo"></button>
-<button pButton (click)="redo(getForkNum(), 1)" [disabled]="canRedo(getForkNum())"label="Redo"></button>
-<button pButton (click)="fork(getForkNum())"label="Fork"></button>
-<button pButton (click)="attemptMergeUp(getForkNum())" [disabled]="getParentId(getForkNum()) == undefined"label=" Merge Up"></button>
-<button pButton (click)="mergeDown(getForkNum())" [disabled]="getChildrenForks().length == 0"label="Merge Down"> </button>
-<button pButton (click)="optimize(getForkNum())"label="optimize"></button>
-<button pButton (click)="clear(getForkNum())"label="clear"></button>
-<p-splitButton icon="fa-add" (onClick)="addRandomAggregate(getForkNum(), viewState.selectedAggregate[getForkNum()], viewState.selectedEvent[getForkNum()])" 
+<span>{{getRealityId()}}</span>
+<button pButton (click)="undo(getRealityId(), 1)" [disabled]="canUndo(getRealityId())"label="Undo"></button>
+<button pButton (click)="redo(getRealityId(), 1)" [disabled]="canRedo(getRealityId())"label="Redo"></button>
+<button pButton (click)="fork(getRealityId())"label="Fork"></button>
+<button pButton (click)="attemptMergeUp(getRealityId())" [disabled]="getParentId(getRealityId()) === undefined" label=" Merge Up"></button>
+<button pButton (click)="mergeDown(getRealityId())" [disabled]="getChildrenRealities().length === 0"label="Merge Down"> </button>
+<button pButton (click)="optimize(getRealityId())"label="optimize"></button>
+<button pButton (click)="clear(getRealityId())"label="clear"></button>
+<p-splitButton icon="fa-add" (onClick)="addRandomAggregate(getRealityId(), viewState.selectedAggregate[getRealityId()], viewState.selectedEvent[getRealityId()])" 
     label="Add Random Aggregate" [model]="availableAggregates">
 </p-splitButton>
-<p-dropdown [options]="getCommandTitles(getForkNum())" [style]="{'width':'250px'}"></p-dropdown>
-<!--<select>
-  <option *ngFor="let commandTitle of getCommandTitles(getForkNum())" value="{{commandTitle}}">
-     {{commandTitle}}
-  </option>
-</select>-->
-<span>{{getStackLengths(getForkNum()).join(' + ')}}</span>
+<p-dropdown [options]="getCommandTitles(getRealityId())" [style]="{'width':'250px'}"></p-dropdown>
 
-<fwb-tree [aggregates]="getRootAggregates()" [fork]="getForkNum()">
+<span>{{getStackLengths(getRealityId()).join(' + ')}}</span>
+
+<fwb-tree [aggregates]="getRootAggregates()" [realityId]="getRealityId()">
 </fwb-tree>
 
 <div style="margin-left: 10px; border-left: 5px solid deeppink">
-    <fwb-workflow *ngFor="let fork of getChildrenForks()" [workflow]="fork">
+    <fwb-workflow *ngFor="let reality of getChildrenRealities()" [workflow]="reality">
     </fwb-workflow>
 </div>

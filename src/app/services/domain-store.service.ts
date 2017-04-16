@@ -4,44 +4,37 @@ import { DomainCache } from './domain-cache.service';
 
 @Injectable()
 export class DomainStore {
-    private workflowForks: Array<Workflow>;
+    private workflowRealities: Array<Workflow>;
 
     constructor(
         private readonly domainCache: DomainCache
     ) { }
 
     create = (name: string) => {
-        this.workflowForks = [];
-        this.workflowForks.push(new Workflow(0, undefined, name));
+        this.workflowRealities = [];
+        this.workflowRealities.push(new Workflow(0, undefined, name));
     }
 
     load = () => {
         // TODO:  pass in information from database
     }
 
-    fork = (fromFork: number): number => {
-        let newForkId = this.workflowForks.length;
-        this.workflowForks.push(new Workflow(newForkId, fromFork, `fork from ${fromFork}`));
-        return this.workflowForks.length - 1;
+    fork = (fromRealityId: number): number => {
+        let newRealityId = this.workflowRealities.length;
+        this.workflowRealities.push(new Workflow(newRealityId, fromRealityId, `fork from ${fromRealityId}`));
+        return this.workflowRealities.length - 1;
     }
 
-    getWorkflow = (fork: number): Workflow => {
-        if (!this.workflowForks) return null;
-        return this.workflowForks[fork];
+    getWorkflow = (realityId: number): Workflow => {
+        if (!this.workflowRealities) return null;
+        return this.workflowRealities[realityId];
     }
 
-    getForks = (): Array<Workflow> => {
-        return this.workflowForks;
+    getRealities = (): Array<Workflow> => {
+        return this.workflowRealities;
     }
 
     isLoaded = (): boolean => {
-        return !(this.workflowForks === undefined);
+        return !(this.workflowRealities === undefined);
     }
-
-    // TODO:  Dont HAVE to do this; just display for good measure.
-    // clear = (forkId: number): void => {
-    //     let name = this.workflowForks[forkId].getName();
-    //     let forkFrom = this.workflowForks[forkId].getParent();
-    //     this.workflowForks[forkId] = new Workflow(forkId, forkFrom, name);
-    // }
 }

@@ -9,7 +9,7 @@ import { CommandBus } from './services/command-bus.service';
     templateUrl: './app/tree-node.component.html'
 })
 export class TreeNodeComponent implements OnInit {
-    @Input() fork: number;
+    @Input() realityId: number;
     @Input() aggregate: WorkflowAggregate;
 
     constructor(
@@ -21,9 +21,9 @@ export class TreeNodeComponent implements OnInit {
         return Object.keys(this.aggregate.events);
     }
 
-    onSelectAggregate = (fork: number, aggregate: WorkflowAggregate, event: string, mouseEvent: MouseEvent): void => {
-        this.viewState.selectedAggregate[fork] = aggregate;
-        this.viewState.selectedEvent[fork] = event;
+    onSelectAggregate = (realityId: number, aggregate: WorkflowAggregate, event: string, mouseEvent: MouseEvent): void => {
+        this.viewState.selectedAggregate[realityId] = aggregate;
+        this.viewState.selectedEvent[realityId] = event;
         // this.onSelectAggregate.emit([aggregate, event, mouseEvent]);
         console.log(aggregate, event);
         mouseEvent.stopPropagation();
@@ -36,10 +36,10 @@ export class TreeNodeComponent implements OnInit {
     onDrop = (aggregate: WorkflowAggregate, eventName: string, $event: any) => {
         const draggingAggregate = this.viewState.draggedAggregate;
 
-        if(aggregate === draggingAggregate) return;
+        if (aggregate === draggingAggregate) return;
         // prevent dropping parent as child
 
         let command = new MoveWorkflowAggregateToTargetCommand(aggregate.getHash(), eventName, draggingAggregate.getHash());
-        this.commandBus.executeCommand(this.fork, command);
+        this.commandBus.executeCommand(this.realityId, command);
     }
 }

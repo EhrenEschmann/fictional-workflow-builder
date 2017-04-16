@@ -19,4 +19,4 @@ export class PostRestApiWorkflowAggregate extends WorkflowAggregate {
     }
 }
 
-TypeStore.put(PostRestApiWorkflowAggregate.prototype.constructor.name, PostRestApiWorkflowAggregate);
+TypeStore.put(PostRestApiWorkflowAggregate);

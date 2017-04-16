@@ -10,7 +10,7 @@ import { DeleteWorkflowAggregateCommand } from './models/commands/deleteWorkflow
     templateUrl: './app/tree.component.html'
 })
 export class TreeComponent {
-    @Input() fork: number;
+    @Input() realityId: number;
     @Input() aggregates: Array<WorkflowAggregate>;
 
     constructor(
@@ -18,24 +18,24 @@ export class TreeComponent {
         private readonly commandBus: CommandBus
     ) { }
 
-    onSelectAggregate = (fork: number, aggregate: WorkflowAggregate, mouseEvent: MouseEvent): void => {
-        this.viewState.selectedAggregate[fork] = aggregate;
-        this.viewState.selectedEvent[fork] = null;
+    onSelectAggregate = (realityId: number, aggregate: WorkflowAggregate, mouseEvent: MouseEvent): void => {
+        this.viewState.selectedAggregate[realityId] = aggregate;
+        this.viewState.selectedEvent[realityId] = null;
         // this.onSelectAggregate.emit([aggregate, event, mouseEvent]);
         console.log(aggregate);
         mouseEvent.stopPropagation();
     }
 
-    updateProperty(forkId: number, aggregate: WorkflowAggregate, propertyKey: string, newValue: string) {
-        console.log(forkId, aggregate, propertyKey, newValue);
+    updateProperty(realityId: number, aggregate: WorkflowAggregate, propertyKey: string, newValue: string) {
+        console.log(realityId, aggregate, propertyKey, newValue);
         const command = new UpdatePropertyCommand(aggregate.getHash(), propertyKey, newValue);
-        this.commandBus.executeCommand(forkId, command);
+        this.commandBus.executeCommand(realityId, command);
     }
 
-    deleteAggregate = (forkId: number, aggregateHash: string): void => {
+    deleteAggregate = (realityId: number, aggregateHash: string): void => {
         const command = new DeleteWorkflowAggregateCommand(aggregateHash);
-        this.commandBus.executeCommand(forkId, command);
-        this.viewState.clearSelectedAggregates(forkId);
+        this.commandBus.executeCommand(realityId, command);
+        this.viewState.clearSelectedAggregates(realityId);
     }
 
     onDragStart = ($event: any, draggingAggregate: WorkflowAggregate) => {

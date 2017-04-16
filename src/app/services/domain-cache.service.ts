@@ -13,19 +13,19 @@ export class DomainCache {
         this.cache = [];
     }
 
-    createCache = (fork: number) => {
-        this.cache[fork] = {};
+    createCache = (realityId: number) => {
+        this.cache[realityId] = {};
     }
 
-    insert = (fork: number, hash: string, aggregateRoot: AggregateRoot): void => {
-        this.cache[fork][hash] = aggregateRoot;
+    insert = (realityId: number, hash: string, aggregateRoot: AggregateRoot): void => {
+        this.cache[realityId][hash] = aggregateRoot;
     }
 
-    remove = (fork: number, hash: string): void => {
-        delete this.cache[fork][hash];
+    remove = (realityId: number, hash: string): void => {
+        delete this.cache[realityId][hash];
     }
 
-    get = (fork: number, hash: string): AggregateRoot => {
-        return this.cache[fork][hash];
+    get = (realityId: number, hash: string): AggregateRoot => {
+        return this.cache[realityId][hash];
     }
 }
