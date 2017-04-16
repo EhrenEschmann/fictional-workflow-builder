@@ -4,7 +4,7 @@ import { DomainCache } from '../services/domain-cache.service';
 import { TypeStore } from '../services/type-store.service';
 
 @Injectable()
-export class AggregateFactory {
+export class TypeStoreFactory {
 
     constructor(
         private readonly domainCache: DomainCache
@@ -12,7 +12,7 @@ export class AggregateFactory {
 
     createAggregate = <T extends WorkflowAggregate>(aggregate: { new (hash: string): T; }, realityId: number, hash: string): T => {
         if (this.domainCache.get(realityId, hash))
-            throw new Error(`aggregate already exists at ${hash}`);
+            throw new Error(`type already exists at ${hash}`);
         const newAggregate = new aggregate(hash);
         this.domainCache.insert(realityId, hash, newAggregate);
         return newAggregate;

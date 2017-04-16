@@ -1,6 +1,6 @@
 import { FutureTargetSettableCommand } from './futureTargetSettableCommand';
 import { QueryBus } from '../../services/query-bus.service';
-import { AggregateFactory } from '../../services/aggregate-factory.service';
+import { TypeStoreFactory } from '../../services/type-store-factory.service';
 import { Workflow } from '../domain/workflow';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
 import { TypeStore } from '../../services/type-store.service';
@@ -16,7 +16,7 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
         public movingHash?: string
     ) { super(); }
 
-    execute = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+    execute = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         let workflow = queryBus.getRootObject(realityId) as Workflow;
         let movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
         if (workflow.rootAggregate().indexOf(movingAggregate) !== -1)
@@ -31,7 +31,7 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
         this.title = `moving ${this.movingHash} to main workflow`;
     }
 
-    undo = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+    undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         let movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
         let workflow = queryBus.getRootObject(realityId) as Workflow;
         workflow.rootAggregate().pop();

@@ -1,6 +1,6 @@
 import { Command } from './command';
 import { QueryBus } from '../../services/query-bus.service';
-import { AggregateFactory } from '../../services/aggregate-factory.service';
+import { TypeStoreFactory } from '../../services/type-store-factory.service';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
 import { TypeStore } from '../../services/type-store.service';
 import { CommandType } from '../command-domain/commandType';
@@ -17,7 +17,7 @@ export class UpdatePropertyCommand extends Command {
         public value: string
     ) { super(); }
 
-    execute = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+    execute = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         const target = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         this.previousValue = target.properties[this.propertyKey].value;
         target.properties[this.propertyKey].value = this.value;
@@ -25,7 +25,7 @@ export class UpdatePropertyCommand extends Command {
         this.title = `updating ${this.targetHash}'s ${this.propertyKey} value from ${this.previousValue} to ${this.value}`;
     }
 
-    undo = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+    undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         const target = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         target.properties[this.propertyKey].value = this.previousValue;
     }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { QueryBus } from './query-bus.service';
 import { CommandStore } from './command-store.service';
-import { AggregateFactory } from './aggregate-factory.service';
+import { TypeStoreFactory } from './type-store-factory.service';
 import { Command } from '../models/commands/command';
 import { CommandReality } from '../models/command-domain/commandReality';
 
@@ -10,12 +10,12 @@ export class CommandBus {
 
     constructor(
         private readonly commandStore: CommandStore,
-        private readonly aggregateFactory: AggregateFactory,
+        private readonly typeStoreFactory: TypeStoreFactory,
         private readonly queryBus: QueryBus
     ) { }
 
     executeCommand = (realityId: number, command: Command, ignorePersist?: boolean): void => {
-        command.execute(realityId, this.queryBus, this.aggregateFactory);
+        command.execute(realityId, this.queryBus, this.typeStoreFactory);
         if (!ignorePersist)
             this.commandStore.storeCommand(realityId, command);
     }
@@ -23,14 +23,14 @@ export class CommandBus {
     undoCommand = (realityId: number, count = 1): void => {
         for (let i = 0; i < count; i++) {
             const command = this.commandStore.undo(realityId);
-            command.undo(realityId, this.queryBus, this.aggregateFactory);
+            command.undo(realityId, this.queryBus, this.typeStoreFactory);
         }
     }
 
     redoCommand = (realityId: number, count: number): void => {
         for (let i = 0; i < count; i++) {
             const command = this.commandStore.redo(realityId);
-            command.execute(realityId, this.queryBus, this.aggregateFactory);
+            command.execute(realityId, this.queryBus, this.typeStoreFactory);
         }
     }
 
@@ -54,7 +54,7 @@ export class CommandBus {
     private clearArchive(realityId: number): void {
         const archive = this.getReality(realityId).getArchive();
         for (let i = archive.length - 1; i >= 0; i--) {
-            archive[i].undo(realityId, this.queryBus, this.aggregateFactory);
+            archive[i].undo(realityId, this.queryBus, this.typeStoreFactory);
         }
     }
 

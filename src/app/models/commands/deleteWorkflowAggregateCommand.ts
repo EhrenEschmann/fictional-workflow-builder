@@ -1,6 +1,6 @@
 import { Command } from './command';
 import { QueryBus } from '../../services/query-bus.service';
-import { AggregateFactory } from '../../services/aggregate-factory.service';
+import { TypeStoreFactory } from '../../services/type-store-factory.service';
 import { TypeStore } from '../../services/type-store.service';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
 import { CommandType } from '../command-domain/commandType';
@@ -13,7 +13,7 @@ export class DeleteWorkflowAggregateCommand extends Command {
         public targetHash: string
     ) { super(); }
 
-    execute = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+    execute = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         let aggregate = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         this.originalIndex = aggregate.parent.indexOf(aggregate);
         if (this.originalIndex === -1)
@@ -23,7 +23,7 @@ export class DeleteWorkflowAggregateCommand extends Command {
         this.title = `Delete ${aggregate.getHash()}`;
     }
 
-    undo = (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => {
+    undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         let aggregate = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         aggregate.parent.splice(this.originalIndex, 0, aggregate);
     }

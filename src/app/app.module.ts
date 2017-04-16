@@ -17,7 +17,7 @@ import { DomainCache } from './services/domain-cache.service';
 import { CommandStore } from './services/command-store.service';
 import { CommandBus } from './services/command-bus.service';
 import { ViewState } from './services/view-state.service';
-import { AggregateFactory } from './services/aggregate-factory.service';
+import { TypeStoreFactory } from './services/type-store-factory.service';
 import { TypeStore } from './services/type-store.service';
 import { CommandOptimizer } from './services/command-optimizer.service';
 import { ValuesPipe } from './pipes/valuesPipe.pipe';
@@ -43,7 +43,7 @@ const appRoutes: Routes = [
     PropertyEditorComponent, ValuesPipe],
   bootstrap: [AppComponent],
   providers: [QueryBus, HashGenerator, WindowRef, WorkflowManager, DomainStore,
-    DomainCache, CommandStore, CommandBus, AggregateFactory, ViewState,
+    DomainCache, CommandStore, CommandBus, TypeStoreFactory, ViewState,
     TypeStore, CommandOptimizer]
 })
 export class AppModule { }

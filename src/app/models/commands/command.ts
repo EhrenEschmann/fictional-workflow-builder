@@ -1,13 +1,13 @@
 import { QueryBus } from '../../services/query-bus.service';
-import { AggregateFactory } from '../../services/aggregate-factory.service';
+import { TypeStoreFactory } from '../../services/type-store-factory.service';
 import { CommandType } from '../command-domain/commandType';
 
 export abstract class Command {
 
   title: string = 'Command Executed';
   abstract aggregateHash: () => string;
-  abstract execute: (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
-  abstract undo: (realityId: number, queryBus: QueryBus, aggregateFactory: AggregateFactory) => void;
+  abstract execute: (realityId: number, queryBus: QueryBus, aggregateFactory: TypeStoreFactory) => void;
+  abstract undo: (realityId: number, queryBus: QueryBus, aggregateFactory: TypeStoreFactory) => void;
   abstract getValue: () => string;
 
   abstract type: CommandType;
