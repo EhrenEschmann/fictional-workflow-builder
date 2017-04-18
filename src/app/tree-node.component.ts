@@ -33,13 +33,24 @@ export class TreeNodeComponent implements OnInit {
         console.log(this.aggregate);
     }
 
-    onDrop = (aggregate: WorkflowAggregate, eventName: string, $event: any) => {
+    onDrop = (aggregate: WorkflowAggregate, eventName: string, $event: DragEvent): void => {
         const draggingAggregate = this.viewState.draggedAggregate;
 
-        if (aggregate === draggingAggregate) return;
+         if (aggregate.events[eventName].indexOf(draggingAggregate) !== -1) return;
+
+        let traveller = aggregate;
+        while (traveller != null) {
+            if (traveller === draggingAggregate) {
+                console.log('Can\'t add a parent as a direct sibling.');
+                return;
+            }
+            traveller = traveller.parentAggregate;
+        }
+        // if (aggregate === draggingAggregate) return;
         // prevent dropping parent as child
 
         let command = new MoveWorkflowAggregateToTargetCommand(aggregate.getHash(), eventName, draggingAggregate.getHash());
         this.commandBus.executeCommand(this.realityId, command);
+        $event.stopPropagation();
     }
 }

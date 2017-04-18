@@ -38,7 +38,7 @@ export class TreeComponent {
         this.viewState.clearSelectedAggregates(realityId);
     }
 
-    onDragStart = ($event: any, draggingAggregate: WorkflowAggregate) => {
+    onDragStart = ($event: DragEvent, draggingAggregate: WorkflowAggregate) => {
         console.log($event, draggingAggregate);
         this.viewState.setDraggedAggregate(draggingAggregate);
     }

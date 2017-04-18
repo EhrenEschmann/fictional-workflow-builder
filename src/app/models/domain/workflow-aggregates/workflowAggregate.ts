@@ -5,12 +5,19 @@ import { Property } from '../property';
 export abstract class WorkflowAggregate implements AggregateRoot {
     abstract name: string;
     parent: Array<WorkflowAggregate>;
+    parentAggregate: WorkflowAggregate;
+
     events: Dictionary<Array<WorkflowAggregate>>;
     properties: Dictionary<Property> = {};
 
     constructor(
         private readonly hash: string
     ) { }
+
+    setParent = (aggregate: WorkflowAggregate, array: Array<WorkflowAggregate>) => {
+        this.parentAggregate = aggregate;
+        this.parent = array;
+    }
 
     getHash = (): string => {
         return this.hash;

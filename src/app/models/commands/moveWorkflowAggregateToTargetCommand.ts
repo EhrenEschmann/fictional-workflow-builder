@@ -7,8 +7,8 @@ import { CommandType } from '../command-domain/commandType';
 import { MoveCommand } from './moveCommand';
 
 export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCommand implements MoveCommand {
-
     private previousParent: Array<WorkflowAggregate>;
+    private previousParentAggregate: WorkflowAggregate;
     private previousIndex: number;
 
     type = CommandType.Move;
@@ -26,20 +26,24 @@ export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCo
             throw new Error(`Aggregate Already exists at ${this.parentHash}, ${this.parentEvent}`);
 
         this.previousParent = movingAggregate.parent;
+        this.previousParentAggregate = movingAggregate.parentAggregate;
 
         if (movingAggregate.parent) {
             this.previousIndex = movingAggregate.parent.indexOf(movingAggregate);
             movingAggregate.parent.splice(this.previousIndex, 1);
         }
 
-        movingAggregate.parent = parentAggregate.events[this.parentEvent];
-        parentAggregate.events[this.parentEvent].push(movingAggregate);
+        let array = parentAggregate.events[this.parentEvent];
+        movingAggregate.setParent(parentAggregate, array);
+
+        array.push(movingAggregate);
         this.title = `moving ${this.movingHash} to ${parentAggregate.name}'s ${this.parentEvent} event`;
     }
 
     undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         let movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
-        movingAggregate.parent.pop();
+        let parentsChildren = movingAggregate.parent;
+        parentsChildren.splice(parentsChildren.indexOf(movingAggregate), 1);
         if (this.previousParent) {
             this.previousParent.splice(this.previousIndex, 0, movingAggregate);
         }

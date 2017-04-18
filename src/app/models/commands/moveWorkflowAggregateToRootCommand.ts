@@ -9,7 +9,9 @@ import { MoveCommand } from './moveCommand';
 
 export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableCommand implements MoveCommand {
     private previousParent: Array<WorkflowAggregate>;
+    private previousParentAggregate: WorkflowAggregate;
     private previousIndex: number;
+
     type = CommandType.Move;
 
     constructor(
@@ -21,12 +23,16 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
         let movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
         if (workflow.rootAggregate().indexOf(movingAggregate) !== -1)
             throw new Error('Aggregate Already exists at root');
+
         this.previousParent = movingAggregate.parent;
+        this.previousParentAggregate = movingAggregate.parentAggregate;
+
         if (movingAggregate.parent) {
             this.previousIndex = movingAggregate.parent.indexOf(movingAggregate);
             movingAggregate.parent.splice(this.previousIndex, 1);
         }
-        movingAggregate.parent = workflow.rootAggregate();
+        movingAggregate.setParent(undefined, workflow.rootAggregate());
+
         workflow.rootAggregate().push(movingAggregate);
         this.title = `moving ${this.movingHash} to main workflow`;
     }
@@ -34,7 +40,8 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
     undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         let movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
         let workflow = queryBus.getRootObject(realityId) as Workflow;
-        workflow.rootAggregate().pop();
+        let parentsChildren = workflow.rootAggregate();
+        parentsChildren.splice(parentsChildren.indexOf(movingAggregate), 1);
         if (this.previousParent) {
             this.previousParent.splice(this.previousIndex, 0, movingAggregate);
         }
