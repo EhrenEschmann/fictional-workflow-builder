@@ -66,19 +66,14 @@ export class WorkflowManager {
     }
 
     optimize = (realityId: number): void => {
-        let originalCommands = this.commandBus.getReality(realityId).getCurrent();
+         let originalCommands = this.commandBus.getReality(realityId).getCurrent();
 
         for (let originalCommand of originalCommands) {
-            try {
-                this.commandBus.undoCommand(realityId, 1); // go 1 at a time in case there are errors.
-            } catch (e) {
-                console.log(`Error:  ${e}`);
-            }
+                this.commandBus.undoCommand(realityId, 1);
         }
 
         let optimizedStack = this.commandOptimizer.optimize(originalCommands);
 
-        // These are potentially volatile
         let warnings: Array<string> = []; // todo make type warning???
         for (let command of optimizedStack) {
             try {
@@ -88,7 +83,9 @@ export class WorkflowManager {
                 console.log(`Error:  ${e}`);
             }
         }
-        console.log('completed with warnings: ' + warnings);
+        if (warnings.length > 0) {
+            console.log('optimization completed with warnings: ' + warnings);
+        }
     }
 
     postOrderMergeUpWorkflow = (fromReality: CommandReality, toRealityId: number) => {
@@ -105,7 +102,7 @@ export class WorkflowManager {
         this.commandBus.clear(fromReality.getId());
 
         // This command modifies the original commands; all prep work must be done before this.
-        allCommands = this.commandOptimizer.optimize(allCommands);
+        // allCommands = this.commandOptimizer.optimize(allCommands);
 
         for (let command of allCommands) {
             try {
@@ -133,14 +130,14 @@ export class WorkflowManager {
 
     mergeDown = (realityId: number) => {
         // 1. optimize
-        this.optimize(realityId);
+        // this.optimize(realityId);
 
         // 2. Get fork
         const reality = this.commandBus.getReality(realityId);
 
         // 3. get commands
         let commands = reality.getArchive().concat(reality.getCurrent());
-        commands = this.commandOptimizer.optimize(commands);
+        // commands = this.commandOptimizer.optimize(commands);
 
         // 4. Get children forks
         const childrenRealities = reality.getChildren();
@@ -173,9 +170,9 @@ export class WorkflowManager {
         this.commandBus.clearCurrent(realityId);
     }
 
-     clearAll = (realityId: number) => {
-         this.commandBus.clear(realityId);
-     }
+    clearAll = (realityId: number) => {
+        this.commandBus.clear(realityId);
+    }
 
     isLoaded = (): boolean => {
         return this.domainStore.isLoaded();

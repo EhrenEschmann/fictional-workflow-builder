@@ -39,6 +39,8 @@ export class AggregateCommandPartition {
     private updateCommands: Array<UpdatePropertyCommand> = [];
     private deleteCommand: Command;
 
+    childrenPartitions: Dictionary<AggregateCommandPartition> = {};
+
     private updateCommandLookup: Dictionary<UpdatePropertyCommand>;
 
     constructor(
@@ -83,12 +85,20 @@ export class AggregateCommandPartition {
         this.deleteCommand = command;
     }
 
+    clearCreate = (): void => {
+        this.createCommand = undefined;
+    }
+
     clearUpdates = (): void => {
         this.updateCommands = [];
     }
 
     clearMoves = (): void => {
         this.moveCommands = [];
+    }
+
+    clearDelete = (): void => {
+        this.deleteCommand = undefined;
     }
 
     getUpdateCommandLookup = (): Dictionary<UpdatePropertyCommand> => {

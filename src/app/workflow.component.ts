@@ -113,7 +113,7 @@ export class WorkflowComponent implements OnInit {
     }
 
     fork = (fromRealityId: number) => {
-        this.workflowManager.optimize(fromRealityId);
+        // this.workflowManager.optimize(fromRealityId);
         this.workflowManager.forkWorkflow(fromRealityId);
     }
 

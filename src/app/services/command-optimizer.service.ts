@@ -26,7 +26,7 @@ export class CommandOptimizer {
         }
     }
 
-    private partition(originalCommands: Array<Command>): Dictionary<AggregateCommandPartition> {
+     private buildPartitionHashTable(originalCommands: Array<Command>): Dictionary<AggregateCommandPartition> {
         let partitions: Dictionary<AggregateCommandPartition> = {};
         for (let i = 0; i < originalCommands.length; i++) {
             let command = originalCommands[i];
@@ -39,43 +39,87 @@ export class CommandOptimizer {
         return partitions;
     }
 
-    private pruneDeletedDependencies(partitions: Dictionary<AggregateCommandPartition>): Dictionary<AggregateCommandPartition> {
-        let prunedPartitions: Dictionary<AggregateCommandPartition> = {};
-        for (let hash in partitions) {
-            if (partitions[hash].deleted()) {
-                if (!partitions[hash].created()) {
-                    partitions[hash].clearUpdates();
-                    partitions[hash].clearMoves();
-                    prunedPartitions[hash] = partitions[hash];
-                }
-            } else if (!partitions[hash].deleted())
-                if (partitions[hash].getParentAggregateHash() === undefined) { // signals root level aggregateCommandPartition
-                    prunedPartitions[hash] = partitions[hash];
-                    // } else if (prunedPartitions[partitions[hash].getParentAggregateHash()]) { <-- this is asking if a command
-                        //  exists that creates its parent, but that wont exist on 
-                        // nested realities who don't store their parent information.
-                } else {
-                    const parentHash = partitions[hash].getParentAggregateHash();
-                    // we can only prune here if getparentHash exists and it was deleted
-                    if (!(partitions[parentHash] && partitions[parentHash].deleted())) {
-                        prunedPartitions[hash] = partitions[hash];
-                    }
-                }
+    private buildPartitionTree(originalCommands: Array<Command>): Dictionary<AggregateCommandPartition> {
+        let partitions: Dictionary<AggregateCommandPartition> = {};
+        let partitionsArray: Array<AggregateCommandPartition> = [];
+        for (let i = 0; i < originalCommands.length; i++) {
+            let command = originalCommands[i];
+            let hash = command.aggregateHash();
+            if (partitions[hash] === undefined) {
+                let partition = new AggregateCommandPartition(hash, i);
+                partitions[hash] = partition;
+                partitionsArray.push(partition);
+            }
+
+            this.updatePartition(partitions[hash], command);
         }
-        return prunedPartitions;
+
+        for (let i = partitionsArray.length - 1; i >= 0; i--) {
+            let hash = partitionsArray[i].getHash();
+            let parentHash = partitionsArray[i].getParentAggregateHash();
+            if (parentHash !== undefined) {
+                partitions[parentHash].childrenPartitions[hash] = partitionsArray[i];
+                delete partitions[hash];
+            }
+        }
+
+        return partitions;
+    }
+
+    private traversePartitionTreeDepthFirst(
+        partitionTree: Dictionary<AggregateCommandPartition>, callback: (partition: AggregateCommandPartition) => void): void {
+        for (let hash in partitionTree) {
+            if (partitionTree.hasOwnProperty(hash)) {
+                callback(partitionTree[hash]);
+                this.traversePartitionTreeDepthFirst(partitionTree[hash].childrenPartitions, callback);
+            }
+        }
+    }
+
+    private pruneDeletedDependencies(partitions: Dictionary<AggregateCommandPartition>): Dictionary<AggregateCommandPartition> {
+        // let prunedPartitions: Dictionary<AggregateCommandPartition> = {};
+        let callback = (partition: AggregateCommandPartition): void => {
+            // let hash = partition.getHash();
+            if (partition.deleted()) {
+                if (partition.created()) {
+                    partition.clearCreate();
+                    partition.clearDelete();
+                }
+                partition.clearUpdates();
+                partition.clearMoves();
+                partition.childrenPartitions = {}; // clear children
+            }
+            // else if (!partition.deleted())
+            //     if (partition.getParentAggregateHash() === undefined) { // signals root level aggregateCommandPartition
+            //         prunedPartitions[hash] = partition;
+            //         // } else if (prunedPartitions[partitions[hash].getParentAggregateHash()]) { <-- this is asking if a command
+            //         //  exists that creates its parent, but that wont exist on 
+            //         // nested realities who don't store their parent information.
+            //     } else {
+            //         const parentHash = partition.getParentAggregateHash();
+            //         // we can only prune here if getparentHash exists and it was deleted
+            //         if (!(partitions[parentHash] && partitions[parentHash].deleted())) {
+            //             prunedPartitions[hash] = partition;
+            //         }
+            //     }
+        };
+
+        this.traversePartitionTreeDepthFirst(partitions, callback);
+        return partitions;
     }
 
     private consolidate(partitions: Dictionary<AggregateCommandPartition>): Dictionary<ConsolidatedAggregateCommandPartition> {
         let consolidated: Dictionary<ConsolidatedAggregateCommandPartition> = {};
-        for (let hash in partitions) {
-            if (partitions.hasOwnProperty(hash)) {
-                consolidated[hash] = partitions[hash].getConsolidated();
-            }
-        }
+        let callback = (partition: AggregateCommandPartition): void => {
+            let hash = partition.getHash();
+            consolidated[hash] = partition.getConsolidated();
+
+        };
+        this.traversePartitionTreeDepthFirst(partitions, callback);
         return consolidated;
     }
 
-    flattenStack = (originalCommands: Array<Command>): Array<Command> => {
+    flattenCommandStack = (originalCommands: Array<Command>): Array<Command> => {
         for (let i = 0; i < originalCommands.length; i++) {
             let command = originalCommands[i];
 
@@ -89,9 +133,8 @@ export class CommandOptimizer {
     }
 
     optimize = (originalCommands: Array<Command>): Array<Command> => {
-        // Flatten Stack???
-        originalCommands = this.flattenStack(originalCommands);
-        let partitions: Dictionary<AggregateCommandPartition> = this.partition(originalCommands);
+        originalCommands = this.flattenCommandStack(originalCommands);
+        let partitions: Dictionary<AggregateCommandPartition> = this.buildPartitionTree(originalCommands);
         partitions = this.pruneDeletedDependencies(partitions);
         let consolidatedPartitions = this.consolidate(partitions);
         let optimizedStack: Array<Command> = [];
@@ -104,9 +147,9 @@ export class CommandOptimizer {
     }
 
     getConflicts = (fromCommands: Array<Command>, toCommands: Array<Command>): Array<CommandConflict> => {
-        let fromPartitions = this.consolidate(this.partition(fromCommands));
+        let fromPartitions = this.consolidate(this.buildPartitionHashTable(fromCommands)); // buildPartitionTree
         // fromPartitions = this.consolidate(fromPartitions);
-        let toPartitions = this.consolidate(this.partition(toCommands));
+        let toPartitions = this.consolidate(this.buildPartitionHashTable(toCommands)); // buildPartitionTree
         // toPartitions = toPartitions);
 
         let conflicts: Array<CommandConflict> = [];

@@ -4,8 +4,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class ValuesPipe implements PipeTransform {
 
   transform(dictionary: Object): Array<any> {
-    var a = [];
-    for (var key in dictionary) {
+    const a = [];
+    for (const key in dictionary) {
       if (dictionary.hasOwnProperty(key)) {
         a.push({key: key, value: dictionary[key]});
       }
