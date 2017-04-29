@@ -36,6 +36,10 @@ export class DeleteWorkflowAggregateCommand extends Command {
         return 'Delete';
     }
 
+    clone = (): Command => {
+        return new DeleteWorkflowAggregateCommand(this.targetHash);
+    }
+
     toJSON() {
         return {
             __type__: this.__type__,

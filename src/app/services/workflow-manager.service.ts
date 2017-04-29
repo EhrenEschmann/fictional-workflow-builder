@@ -47,6 +47,14 @@ export class WorkflowManager {
         return reality.getRedoLength() === 0;
     }
 
+    private cloneCommands(commands: Array<Command>): Array<Command> {
+        let cloned: Array<Command> = [];
+        for (let i = 0; i < commands.length; i++) {
+            cloned.push(commands[i].clone());
+        }
+        return cloned;
+    }
+
     forkWorkflow = (fromRealityId: number) => {
         let domainRealityId = this.domainStore.fork(fromRealityId);
         let commandRealityId = this.commandStore.fork(fromRealityId);
@@ -54,25 +62,19 @@ export class WorkflowManager {
         this.domainCache.createCache(domainRealityId);
 
         let commandReality = this.commandStore.findReality(fromRealityId);
-        let newArchive: Array<Command> = commandReality.getArchive().concat(commandReality.getCurrent());
+        let newArchive: Array<Command> = this.cloneCommands(commandReality.getArchive().concat(commandReality.getCurrent()));
 
         for (let command of newArchive) {
-            try {
-                this.commandBus.executeCommand(domainRealityId, command, true);
-            } catch (e) {
-                console.log(`Error:  ${e}`);
-            }
+            this.commandBus.executeCommand(domainRealityId, command, true);
         }
     }
 
     optimize = (realityId: number): void => {
-         let originalCommands = this.commandBus.getReality(realityId).getCurrent();
+        let originalCommands = this.commandBus.getReality(realityId).getCurrent();
 
-        for (let originalCommand of originalCommands) {
-                this.commandBus.undoCommand(realityId, 1);
-        }
+        this.commandBus.undoCommand(realityId, originalCommands.length);
 
-        let optimizedStack = this.commandOptimizer.optimize(originalCommands);
+        let optimizedStack = this.cloneCommands(this.commandOptimizer.optimize(originalCommands));
 
         let warnings: Array<string> = []; // todo make type warning???
         for (let command of optimizedStack) {
@@ -93,27 +95,21 @@ export class WorkflowManager {
         let fromCommands = fromReality.getCurrent();
         let toCommands = toReality.getCurrent();
 
-        let allCommands = toCommands.concat(fromCommands);
+        let allCommands = this.cloneCommands(toCommands.concat(fromCommands));
 
-        // clear and rebuild toReality from archive
         this.commandBus.clearCurrent(toRealityId);
 
-        // clear and rebuild toReality from ~~NEW~~ archive
         this.commandBus.clear(fromReality.getId());
-
-        // This command modifies the original commands; all prep work must be done before this.
-        // allCommands = this.commandOptimizer.optimize(allCommands);
 
         for (let command of allCommands) {
             try {
                 this.commandBus.executeCommand(toRealityId, command);
-                // this.commandBus.executeCommand(fromReality.getId(), command, true);
             } catch (e) {
                 console.log(`Error:  ${e}`);
             }
         }
 
-        let newArchive = toReality.getArchive().concat(toReality.getCurrent());
+        let newArchive = this.cloneCommands(toReality.getArchive().concat(toReality.getCurrent()));
         for (let command of newArchive) {
             try {
                 this.commandBus.executeCommand(fromReality.getId(), command, true);
@@ -129,38 +125,27 @@ export class WorkflowManager {
     }
 
     mergeDown = (realityId: number) => {
-        // 1. optimize
-        // this.optimize(realityId);
-
-        // 2. Get fork
         const reality = this.commandBus.getReality(realityId);
 
-        // 3. get commands
-        let commands = reality.getArchive().concat(reality.getCurrent());
-        // commands = this.commandOptimizer.optimize(commands);
-
-        // 4. Get children forks
         const childrenRealities = reality.getChildren();
 
-        // loop over each child, perform merge up
         for (let childReality of childrenRealities) {
+            let commands = this.cloneCommands(reality.getArchive().concat(reality.getCurrent()));
             let childRealityId = childReality.getId();
-            // this.optimize(childrenRealities);
-
-            let originalCommands = childReality.getCurrent();
+            let originalCommands = this.cloneCommands(childReality.getCurrent());
 
             this.commandBus.clear(childReality.getId());
 
             for (let command of commands) {
-                this.commandBus.executeCommand(childRealityId, command, true); // TODO:  try/catch this???  
+                this.commandBus.executeCommand(childRealityId, command, true);
             }
             childReality.setArchive(commands);
 
             for (let originalCommand of originalCommands) {
                 try {
-                    this.commandBus.executeCommand(childRealityId, originalCommand); // go 1 at a time in case there are errors.
+                    this.commandBus.executeCommand(childRealityId, originalCommand); 
                 } catch (e) {
-                    console.log(`Error:  ${e}`);  // We shouldn't see any errors here.
+                    console.log(`Error:  ${e}`);
                 }
             }
         }

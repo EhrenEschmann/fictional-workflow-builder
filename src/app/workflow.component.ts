@@ -64,6 +64,11 @@ export class WorkflowComponent implements OnInit {
                 }
             }
         ];
+
+        // this.hotkeysService.add(new Hotkey('meta+v', (event: KeyboardEvent): boolean => {
+        //     console.log('Typed hotkey');
+        //     return false;
+        // }));
     }
 
     canUndo = (realityId: number): boolean => {
@@ -195,4 +200,17 @@ export class WorkflowComponent implements OnInit {
         // }
         this.conflicts.splice(this.conflicts.indexOf(conflict), 1);
     }
+
+    onRootDrop = (realityId: number, $event: DragEvent): void => {
+        const draggingAggregate = this.viewState.draggedAggregate;
+
+        if (draggingAggregate.parent === undefined) return;
+        // if (aggregate === draggingAggregate) return;
+        // prevent dropping parent as child
+
+        let command = new MoveWorkflowAggregateToRootCommand(draggingAggregate.getHash());
+        this.commandBus.executeCommand(realityId, command);
+        $event.stopPropagation();
+    }
+
 }

@@ -29,20 +29,20 @@
             </td>
         </tr>
     </table>
-     <p-footer>
+    <p-footer>
         <button pButton (click)="mergeUp(getRealityId()); mergeDialogDisplayed = false" label="merge!"></button>
     </p-footer>
 </p-dialog>
 <hr />
 <span>{{getRealityId()}}</span>
-<button pButton (click)="undo(getRealityId(), 1)" [disabled]="canUndo(getRealityId())"label="Undo"></button>
-<button pButton (click)="redo(getRealityId(), 1)" [disabled]="canRedo(getRealityId())"label="Redo"></button>
-<button pButton (click)="fork(getRealityId())"label="Fork"></button>
+<button pButton (click)="undo(getRealityId(), 1)" [disabled]="canUndo(getRealityId())" label="Undo"></button>
+<button pButton (click)="redo(getRealityId(), 1)" [disabled]="canRedo(getRealityId())" label="Redo"></button>
+<button pButton (click)="fork(getRealityId())" label="Fork"></button>
 <button pButton (click)="attemptMergeUp(getRealityId())" [disabled]="getParentId(getRealityId()) === undefined" label=" Merge Up"></button>
-<button pButton (click)="mergeDown(getRealityId())" [disabled]="getChildrenRealities().length === 0"label="Merge Down"> </button>
-<button pButton (click)="optimize(getRealityId())"label="optimize"></button>
-<button pButton (click)="clear(getRealityId())"label="clear"></button>
-<p-splitButton icon="fa-add" (onClick)="addRandomAggregate(getRealityId(), viewState.selectedAggregate[getRealityId()], viewState.selectedEvent[getRealityId()])" 
+<button pButton (click)="mergeDown(getRealityId())" [disabled]="getChildrenRealities().length === 0" label="Merge Down"> </button>
+<button pButton (click)="optimize(getRealityId())" label="optimize"></button>
+<button pButton (click)="clear(getRealityId())" label="clear"></button>
+<p-splitButton icon="fa-add" (onClick)="addRandomAggregate(getRealityId(), viewState.selectedAggregate[getRealityId()], viewState.selectedEvent[getRealityId()])"
     label="Add Random Aggregate" [model]="availableAggregates">
 </p-splitButton>
 <p-dropdown [options]="getCommandTitles(getRealityId())" [style]="{'width':'250px'}"></p-dropdown>
@@ -51,6 +51,7 @@
 
 <fwb-tree [aggregates]="getRootAggregates()" [realityId]="getRealityId()">
 </fwb-tree>
+<div style="height: 20px; width: 100%;" pDroppable="workflow" (onDrop)="onRootDrop(getRealityId(), $event)"></div>
 
 <div style="margin-left: 10px; border-left: 5px solid deeppink">
     <fwb-workflow *ngFor="let reality of getChildrenRealities()" [workflow]="reality">

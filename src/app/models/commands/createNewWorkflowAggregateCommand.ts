@@ -41,6 +41,14 @@ export class CreateNewWorkflowAggregateCommand extends Command {
         return 'Create';
     }
 
+    clone = (): Command => {
+        let newUpdateCommands: Array<FutureTargetSettableCommand> = [];
+        for (let i = 0; i < this.updateCommands.length; i++) {
+            newUpdateCommands.push(this.updateCommands[i].clone() as FutureTargetSettableCommand);
+        }
+        return new CreateNewWorkflowAggregateCommand(this.aggregateType, this.targetHash, newUpdateCommands);
+    }
+
     toJSON() {
         return {
             __type__: this.__type__,

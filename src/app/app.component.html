@@ -1,6 +1,6 @@
 <button pButton (click)="createNew()" [disabled]="activeWorkflow()" label="create new workflow"></button>
-<button pButton (click)="open()" label="open workflow"></button>
-<button pButton (click)="save()" label="save workflow"></button>
+<!--<button pButton (click)="simulate()" label="start command simulation"></button>-->
+<!--<fwb-command-simulator style="float: left"></fwb-command-simulator>-->
 
 <fwb-workflow *ngIf="getRootReality()" [workflow]="getRootReality()">
 </fwb-workflow>

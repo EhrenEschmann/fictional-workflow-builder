@@ -5,6 +5,7 @@ import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggrega
 import { TypeStore } from '../../services/type-store.service';
 import { CommandType } from '../command-domain/commandType';
 import { MoveCommand } from './moveCommand';
+import { Command } from './command';
 
 export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCommand implements MoveCommand {
     private previousParent: Array<WorkflowAggregate>;
@@ -64,6 +65,10 @@ export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCo
 
     getValue = (): string => {
         return `[${this.parentHash}][${this.parentEvent}]`;
+    }
+
+    clone = (): Command => {
+        return new MoveWorkflowAggregateToTargetCommand(this.parentHash, this.parentEvent, this.movingHash);
     }
 
     toJSON() {

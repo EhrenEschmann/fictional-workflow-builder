@@ -10,8 +10,7 @@ export class HashGenerator {
     ) { }
 
     createHash = (): string => {
-        let random = (Math.random() * 100000000000000000).toString(); // "";//UUID.UUID();
+        let random = (Math.random() * 100000000000000000).toString();
         return this.winRef.nativeWindow.btoa(random);
-        // return this.windowObj.btoa(random.toString());
     }
 }

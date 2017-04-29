@@ -40,10 +40,18 @@ export class CommandStore {
     return this.countChildren(this.workflow) + 1;
   }
 
+  private cloneCommands(commands: Array<Command>): Array<Command> {
+    let cloned: Array<Command> = [];
+    for (let i = 0; i < commands.length; i++) {
+      cloned.push(commands[i].clone());
+    }
+    return cloned;
+  }
+
   fork = (fromRealityId: number): number => {
     let reality = this.findReality(fromRealityId);
     let newId = this.getSize();
-    let newArchive = reality.getArchive().concat(reality.getCurrent());
+    let newArchive = this.cloneCommands(reality.getArchive().concat(reality.getCurrent()));
     reality.addChild(new CommandReality(newId, newArchive, reality));
     return newId;
   }

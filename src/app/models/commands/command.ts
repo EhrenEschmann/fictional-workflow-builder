@@ -10,6 +10,7 @@ export abstract class Command {
   abstract undo: (realityId: number, queryBus: QueryBus, aggregateFactory: TypeStoreFactory) => void;
   abstract getValue: () => string;
 
+  abstract clone: () => Command;
   abstract type: CommandType;
   __type__: string = (this.constructor as any).name;
 

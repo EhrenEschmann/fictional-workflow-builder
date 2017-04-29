@@ -26,7 +26,7 @@ export class CommandOptimizer {
         }
     }
 
-     private buildPartitionHashTable(originalCommands: Array<Command>): Dictionary<AggregateCommandPartition> {
+    private buildPartitionHashTable(originalCommands: Array<Command>): Dictionary<AggregateCommandPartition> {
         let partitions: Dictionary<AggregateCommandPartition> = {};
         for (let i = 0; i < originalCommands.length; i++) {
             let command = originalCommands[i];
@@ -54,16 +54,19 @@ export class CommandOptimizer {
             this.updatePartition(partitions[hash], command);
         }
 
-        for (let i = partitionsArray.length - 1; i >= 0; i--) {
+        let partitionTree: Dictionary<AggregateCommandPartition> = {};
+        // for (let i = partitionsArray.length - 1; i >= 0; i--) {
+        for (let i = 0; i < partitionsArray.length; i++) {
             let hash = partitionsArray[i].getHash();
             let parentHash = partitionsArray[i].getParentAggregateHash();
             if (parentHash !== undefined) {
                 partitions[parentHash].childrenPartitions[hash] = partitionsArray[i];
-                delete partitions[hash];
+            } else {
+                partitionTree[hash] = partitionsArray[i];
             }
         }
 
-        return partitions;
+        return partitionTree;
     }
 
     private traversePartitionTreeDepthFirst(
@@ -89,19 +92,6 @@ export class CommandOptimizer {
                 partition.clearMoves();
                 partition.childrenPartitions = {}; // clear children
             }
-            // else if (!partition.deleted())
-            //     if (partition.getParentAggregateHash() === undefined) { // signals root level aggregateCommandPartition
-            //         prunedPartitions[hash] = partition;
-            //         // } else if (prunedPartitions[partitions[hash].getParentAggregateHash()]) { <-- this is asking if a command
-            //         //  exists that creates its parent, but that wont exist on 
-            //         // nested realities who don't store their parent information.
-            //     } else {
-            //         const parentHash = partition.getParentAggregateHash();
-            //         // we can only prune here if getparentHash exists and it was deleted
-            //         if (!(partitions[parentHash] && partitions[parentHash].deleted())) {
-            //             prunedPartitions[hash] = partition;
-            //         }
-            //     }
         };
 
         this.traversePartitionTreeDepthFirst(partitions, callback);
@@ -134,7 +124,7 @@ export class CommandOptimizer {
 
     optimize = (originalCommands: Array<Command>): Array<Command> => {
         originalCommands = this.flattenCommandStack(originalCommands);
-        let partitions: Dictionary<AggregateCommandPartition> = this.buildPartitionTree(originalCommands);
+        let partitions = this.buildPartitionTree(originalCommands);
         partitions = this.pruneDeletedDependencies(partitions);
         let consolidatedPartitions = this.consolidate(partitions);
         let optimizedStack: Array<Command> = [];
@@ -143,7 +133,8 @@ export class CommandOptimizer {
                 optimizedStack = optimizedStack.concat(consolidatedPartitions[hash].getOrderedCommands());
             }
         }
-        return optimizedStack;
+        const intersection = originalCommands.filter((c: Command) => optimizedStack.indexOf(c) !== -1);
+        return intersection;
     }
 
     getConflicts = (fromCommands: Array<Command>, toCommands: Array<Command>): Array<CommandConflict> => {

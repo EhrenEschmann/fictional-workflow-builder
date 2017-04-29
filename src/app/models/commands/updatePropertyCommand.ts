@@ -46,6 +46,10 @@ export class UpdatePropertyCommand extends Command {
         return `[${this.value}]`;
     }
 
+    clone = (): Command => {
+        return new UpdatePropertyCommand(this.targetHash, this.propertyKey, this.value);
+    }
+
     toJSON() {
         return {
             __type__: this.__type__,
