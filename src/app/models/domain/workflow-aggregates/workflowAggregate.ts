@@ -24,7 +24,6 @@ export abstract class WorkflowAggregate implements AggregateRoot {
         return this.hash;
     }
 
-
     protected initializeProperties = (): void => {
         let aggregate: WorkflowAggregate = this;
         this.properties = {};

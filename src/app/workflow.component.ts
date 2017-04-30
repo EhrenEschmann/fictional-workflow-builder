@@ -13,7 +13,6 @@ import { MergeTypeAware } from './decorators/mergeTypeAware.decorator';
 import { ResolutionAware } from './decorators/resolutionAware.decorator';
 import { CommandConflict } from './models/command-domain/commandConflict';
 import { Resolution } from './models/domain/resolution';
-import { Hotkey, HotkeysService } from 'angular2-hotkeys';
 
 @Component({
     selector: 'fwb-workflow',
