@@ -12,14 +12,16 @@ export class CreateNewWorkflowAggregateCommand extends Command {
     constructor(
         public aggregateType: string,
         public targetHash: string,
-        public updateCommands: Array<FutureTargetSettableCommand> = []
+        public updateCommands: Array<Command> = []
     ) { super(); }
 
     execute = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         typeStoreFactory.createAggregateByType(this.aggregateType, realityId, this.targetHash);
 
         for (let command of this.updateCommands) {
-            command.setTarget(this.targetHash);
+            if (command instanceof FutureTargetSettableCommand) {
+                command.setTarget(this.targetHash);
+            }
             command.execute(realityId, queryBus, typeStoreFactory);
         }
 

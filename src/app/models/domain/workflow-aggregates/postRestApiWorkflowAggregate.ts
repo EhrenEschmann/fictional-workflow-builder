@@ -6,6 +6,7 @@ export class PostRestApiWorkflowAggregate extends WorkflowAggregate {
     url: Property = new Property();
     body: Property = new Property();
     name = 'Post Rest API';
+    type: string = this.constructor.name;
 
     constructor(hash: string) {
         super(hash);

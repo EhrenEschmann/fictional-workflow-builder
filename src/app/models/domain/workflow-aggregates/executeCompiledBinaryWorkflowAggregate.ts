@@ -6,6 +6,7 @@ export class ExecuteCompiledBinaryWorkflowAggregate extends WorkflowAggregate {
     location: Property = new Property();
     parameters: Property = new Property();
     name = 'Execute Compiled Binary';
+    type: string = this.constructor.name;
 
     constructor(hash: string) {
         super(hash);
@@ -17,6 +18,7 @@ export class ExecuteCompiledBinaryWorkflowAggregate extends WorkflowAggregate {
 
         this.initializeProperties();
     }
+
 }
 
 TypeStore.put(ExecuteCompiledBinaryWorkflowAggregate);

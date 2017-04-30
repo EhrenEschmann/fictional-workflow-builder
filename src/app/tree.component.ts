@@ -19,8 +19,7 @@ export class TreeComponent {
     ) { }
 
     onSelectAggregate = (realityId: number, aggregate: WorkflowAggregate, mouseEvent: MouseEvent): void => {
-        this.viewState.selectedAggregate[realityId] = aggregate;
-        this.viewState.selectedEvent[realityId] = null;
+        this.viewState.setSelectedAggregate(aggregate, undefined, realityId);
         // this.onSelectAggregate.emit([aggregate, event, mouseEvent]);
         console.log(aggregate);
         mouseEvent.stopPropagation();

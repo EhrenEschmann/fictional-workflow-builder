@@ -22,9 +22,7 @@ export class TreeNodeComponent implements OnInit {
     }
 
     onSelectAggregate = (realityId: number, aggregate: WorkflowAggregate, event: string, mouseEvent: MouseEvent): void => {
-        this.viewState.selectedAggregate[realityId] = aggregate;
-        this.viewState.selectedEvent[realityId] = event;
-        // this.onSelectAggregate.emit([aggregate, event, mouseEvent]);
+        this.viewState.setSelectedAggregate(aggregate, event, realityId);
         console.log(aggregate, event);
         mouseEvent.stopPropagation();
     }

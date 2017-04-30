@@ -7,6 +7,7 @@ export class SendEmailWorkflowAggregate extends WorkflowAggregate {
     subject: Property = new Property();
     message: Property = new Property();
     name = 'Send Email';
+    type: string = this.constructor.name;
 
     constructor(hash: string) {
         super(hash);

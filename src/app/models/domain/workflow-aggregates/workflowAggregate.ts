@@ -6,6 +6,7 @@ export abstract class WorkflowAggregate implements AggregateRoot {
     abstract name: string;
     parent: Array<WorkflowAggregate>;
     parentAggregate: WorkflowAggregate;
+    abstract type: string;
 
     events: Dictionary<Array<WorkflowAggregate>>;
     properties: Dictionary<Property> = {};
@@ -22,6 +23,7 @@ export abstract class WorkflowAggregate implements AggregateRoot {
     getHash = (): string => {
         return this.hash;
     }
+
 
     protected initializeProperties = (): void => {
         let aggregate: WorkflowAggregate = this;

@@ -1,11 +1,12 @@
 import { Command } from './command';
+import { FutureTargetSettableCommand } from './futureTargetSettableCommand';
 import { QueryBus } from '../../services/query-bus.service';
 import { TypeStoreFactory } from '../../services/type-store-factory.service';
 import { WorkflowAggregate } from '../domain/workflow-aggregates/workflowAggregate';
 import { TypeStore } from '../../services/type-store.service';
 import { CommandType } from '../command-domain/commandType';
 
-export class UpdatePropertyCommand extends Command {
+export class UpdatePropertyCommand extends FutureTargetSettableCommand {
 
     private previousValue: string;
 
@@ -28,6 +29,10 @@ export class UpdatePropertyCommand extends Command {
     undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         const target = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
         target.properties[this.propertyKey].value = this.previousValue;
+    }
+
+    setTarget = (hash: string) => {
+        this.targetHash = hash;
     }
 
     updatedHash = () => {

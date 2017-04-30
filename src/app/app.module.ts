@@ -17,12 +17,15 @@ import { DomainCache } from './services/domain-cache.service';
 import { CommandStore } from './services/command-store.service';
 import { CommandBus } from './services/command-bus.service';
 import { ViewState } from './services/view-state.service';
+import { Clipboard } from './services/clipboard.service';
 import { TypeStoreFactory } from './services/type-store-factory.service';
 import { TypeStore } from './services/type-store.service';
 import { CommandOptimizer } from './services/command-optimizer.service';
 import { ValuesPipe } from './pipes/valuesPipe.pipe';
 import { PropertyEditorComponent } from './property-editor.component';
-// import { UUID } from 'angular2-uuid';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HotkeyModule } from 'angular2-hotkeys';
+
 import './models/domain/workflow-aggregates/executeCompiledBinaryWorkflowAggregate';
 import './models/domain/workflow-aggregates/postRestApiWorkflowAggregate';
 import './models/domain/workflow-aggregates/sendEmailWorkflowAggregate';
@@ -38,12 +41,13 @@ const appRoutes: Routes = [
 
 @NgModule({
   imports: [BrowserModule, FormsModule, RouterModule.forRoot(appRoutes), DialogModule,
-    ButtonModule, SplitButtonModule, InputTextModule, DropdownModule, DragDropModule],
+    ButtonModule, SplitButtonModule, InputTextModule, DropdownModule, DragDropModule,
+    BrowserAnimationsModule, HotkeyModule.forRoot()],
   declarations: [AppComponent, WorkflowComponent, TreeComponent, TreeNodeComponent,
     PropertyEditorComponent, ValuesPipe],
   bootstrap: [AppComponent],
   providers: [QueryBus, HashGenerator, WindowRef, WorkflowManager, DomainStore,
     DomainCache, CommandStore, CommandBus, TypeStoreFactory, ViewState,
-    TypeStore, CommandOptimizer]
+    TypeStore, CommandOptimizer, Clipboard]
 })
 export class AppModule { }

@@ -3,14 +3,29 @@ import { WorkflowAggregate } from '../models/domain/workflow-aggregates/workflow
 
 @Injectable()
 export class ViewState {
-  selectedAggregate: Array<WorkflowAggregate>;
-  selectedEvent: Array<string>;
+  private selectedAggregate: Array<WorkflowAggregate>;
+  private selectedEvent: Array<string>;
+  lastSelectedRealityId: number;
 
   draggedAggregate: WorkflowAggregate;
 
   constructor() {
     this.selectedAggregate = [];
     this.selectedEvent = [];
+  }
+
+  setSelectedAggregate = (aggregate: WorkflowAggregate, event: string, realityId: number) => {
+    this.selectedAggregate[realityId] = aggregate;
+    this.selectedEvent[realityId] = event;
+    this.lastSelectedRealityId = realityId;
+  }
+
+  getSelectedEvent = (realityId: number) => {
+    return this.selectedEvent[realityId];
+  }
+
+  getSelectedAggregate = (realityId: number) => {
+    return this.selectedAggregate[realityId];
   }
 
   clearSelectedAggregates = (realityId: number) => {

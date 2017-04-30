@@ -13,6 +13,7 @@ import { MergeTypeAware } from './decorators/mergeTypeAware.decorator';
 import { ResolutionAware } from './decorators/resolutionAware.decorator';
 import { CommandConflict } from './models/command-domain/commandConflict';
 import { Resolution } from './models/domain/resolution';
+import { Hotkey, HotkeysService } from 'angular2-hotkeys';
 
 @Component({
     selector: 'fwb-workflow',
@@ -44,31 +45,26 @@ export class WorkflowComponent implements OnInit {
                 label: 'Execute Compiled Binary',
                 command: () => {
                     const realityId = this.getRealityId();
-                    this.addAggregate(realityId, this.viewState.selectedAggregate[realityId],
-                        this.viewState.selectedEvent[realityId], 'ExecuteCompiledBinaryWorkflowAggregate');
+                    this.addAggregate(realityId, this.viewState.getSelectedAggregate(realityId),
+                        this.viewState.getSelectedEvent(realityId), 'ExecuteCompiledBinaryWorkflowAggregate');
                 }
             },
             {
                 label: 'Post Rest Api',
                 command: () => {
                     const realityId = this.getRealityId();
-                    this.addAggregate(realityId, this.viewState.selectedAggregate[realityId],
-                        this.viewState.selectedEvent[realityId], 'PostRestApiWorkflowAggregate');
+                    this.addAggregate(realityId, this.viewState.getSelectedAggregate(realityId),
+                        this.viewState.getSelectedEvent(realityId), 'PostRestApiWorkflowAggregate');
                 }
             }, {
                 label: 'Send Email',
                 command: () => {
                     const realityId = this.getRealityId();
-                    this.addAggregate(realityId, this.viewState.selectedAggregate[realityId],
-                        this.viewState.selectedEvent[realityId], 'SendEmailWorkflowAggregate');
+                    this.addAggregate(realityId, this.viewState.getSelectedAggregate(realityId),
+                        this.viewState.getSelectedEvent(realityId), 'SendEmailWorkflowAggregate');
                 }
             }
         ];
-
-        // this.hotkeysService.add(new Hotkey('meta+v', (event: KeyboardEvent): boolean => {
-        //     console.log('Typed hotkey');
-        //     return false;
-        // }));
     }
 
     canUndo = (realityId: number): boolean => {
@@ -123,8 +119,7 @@ export class WorkflowComponent implements OnInit {
     }
 
     selectAggregate = (realityId: number, aggregate: WorkflowAggregate, event: string): void => {
-        this.viewState.selectedAggregate[realityId] = aggregate;
-        this.viewState.selectedEvent[realityId] = event;
+        this.viewState.setSelectedAggregate(aggregate, undefined, realityId);
     }
 
     getChildrenRealities = (): Array<Workflow> => {
