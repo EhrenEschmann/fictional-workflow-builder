@@ -19,7 +19,7 @@ export class PropertyEditorComponent {
         this.updatedValue = new Subject<string>();
         this.valueChanged = new EventEmitter<string>();
         this.updatedValue
-            .debounceTime(700)
+            .debounceTime(750)
             .distinctUntilChanged()
             .subscribe((value: string) => this.valueChanged.emit(value));
     }

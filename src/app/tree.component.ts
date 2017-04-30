@@ -41,9 +41,4 @@ export class TreeComponent {
         console.log($event, draggingAggregate);
         this.viewState.setDraggedAggregate(draggingAggregate);
     }
-
-    // onDragEnd = ($event: any, draggingAggregate: WorkflowAggregate) => { // TODO:  May not be needed????
-    //     console.log($event, draggingAggregate);
-    //     this.viewState.setDraggedAggregate(undefined);
-    // }
 }
