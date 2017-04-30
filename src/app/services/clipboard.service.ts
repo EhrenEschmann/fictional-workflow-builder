@@ -36,5 +36,4 @@ export class Clipboard {
 
     return createCommand;
   }
-
 }

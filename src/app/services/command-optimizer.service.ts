@@ -55,7 +55,6 @@ export class CommandOptimizer {
         }
 
         let partitionTree: Dictionary<AggregateCommandPartition> = {};
-        // for (let i = partitionsArray.length - 1; i >= 0; i--) {
         for (let i = 0; i < partitionsArray.length; i++) {
             let hash = partitionsArray[i].getHash();
             let parentHash = partitionsArray[i].getParentAggregateHash();
@@ -80,9 +79,7 @@ export class CommandOptimizer {
     }
 
     private pruneDeletedDependencies(partitions: Dictionary<AggregateCommandPartition>): Dictionary<AggregateCommandPartition> {
-        // let prunedPartitions: Dictionary<AggregateCommandPartition> = {};
         let callback = (partition: AggregateCommandPartition): void => {
-            // let hash = partition.getHash();
             if (partition.deleted()) {
                 if (partition.created()) {
                     partition.clearCreate();
@@ -90,7 +87,7 @@ export class CommandOptimizer {
                 }
                 partition.clearUpdates();
                 partition.clearMoves();
-                partition.childrenPartitions = {}; // clear children
+                partition.childrenPartitions = {};
             }
         };
 
@@ -138,34 +135,26 @@ export class CommandOptimizer {
     }
 
     getConflicts = (fromCommands: Array<Command>, toCommands: Array<Command>): Array<CommandConflict> => {
-        let fromPartitions = this.consolidate(this.buildPartitionHashTable(fromCommands)); // buildPartitionTree
-        // fromPartitions = this.consolidate(fromPartitions);
-        let toPartitions = this.consolidate(this.buildPartitionHashTable(toCommands)); // buildPartitionTree
-        // toPartitions = toPartitions);
-
+        let fromPartitions = this.consolidate(this.buildPartitionHashTable(fromCommands));
+        let toPartitions = this.consolidate(this.buildPartitionHashTable(toCommands));
         let conflicts: Array<CommandConflict> = [];
+
         for (let fromHash in fromPartitions) {
-            // TODO:  Also check for moves, updates to objects that dont exist anymore in toParititions
-            // TODO:  If we start with toParitions, will we have to worry about this extra case?
-            if (toPartitions[fromHash]) { // if there was a change in both realities
-                // 1.  Cant both have a create; auto-merge deletes
+            if (toPartitions[fromHash]) {
                 if (!fromPartitions[fromHash].deleteCommand) {
-                    // TODO:  don't need to do this if there are deletes:
-                    // 2. Check for Move conflict
-                    if (toPartitions[fromHash].moveCommand) { // possible conflict
+                    if (toPartitions[fromHash].moveCommand) {
                         let toCommand = toPartitions[fromHash].moveCommand;
                         let fromCommand = fromPartitions[fromHash].moveCommand;
                         if (fromCommand && toCommand)
-                            if (toCommand.generateHash() !== fromCommand.generateHash()) // conflict
+                            if (toCommand.generateHash() !== fromCommand.generateHash())
                                 conflicts.push(new CommandConflict(fromPartitions[fromHash].moveCommand,
                                     toPartitions[fromHash].moveCommand));
                     }
-                    // 3.  check for update conflict
                     for (let fromProperty in fromPartitions[fromHash].updateCommands) {
                         if (fromPartitions[fromHash].updateCommands.hasOwnProperty(fromProperty)) {
                             let toCommand = toPartitions[fromHash].updateCommands[fromProperty];
                             let fromCommand = fromPartitions[fromHash].updateCommands[fromProperty];
-                            if (toCommand && toCommand.value !== fromCommand.value) { // conflict
+                            if (toCommand && toCommand.value !== fromCommand.value) {
                                 conflicts.push(new CommandConflict(fromPartitions[fromHash].updateCommands[fromProperty],
                                     toPartitions[fromHash].updateCommands[fromProperty]));
                             }
