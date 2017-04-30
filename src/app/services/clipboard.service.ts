@@ -15,9 +15,8 @@ export class Clipboard {
       this.clipboard = this.duplicate(aggregate, undefined);
     }
   }
-
   get = (): CreateNewWorkflowAggregateCommand => {
-    return this.clipboard;
+    return this.clipboard.clone() as CreateNewWorkflowAggregateCommand;
   }
 
   private duplicate(aggregate: WorkflowAggregate, toParentEvent: string): CreateNewWorkflowAggregateCommand {

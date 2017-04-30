@@ -143,7 +143,7 @@ export class WorkflowManager {
 
             for (let originalCommand of originalCommands) {
                 try {
-                    this.commandBus.executeCommand(childRealityId, originalCommand); 
+                    this.commandBus.executeCommand(childRealityId, originalCommand);
                 } catch (e) {
                     console.log(`Error:  ${e}`);
                 }
