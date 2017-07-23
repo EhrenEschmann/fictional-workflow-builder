@@ -21,7 +21,7 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
 
     execute = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
         let workflow = queryBus.getRootObject(realityId) as Workflow;
-        let movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
+        let movingAggregate = queryBus.getAggregate(realityId, this.movingHash) as WorkflowAggregate;
         if (workflow.rootAggregate().indexOf(movingAggregate) !== -1)
             throw new Error('Aggregate Already exists at root');
 
@@ -39,7 +39,7 @@ export class MoveWorkflowAggregateToRootCommand extends FutureTargetSettableComm
     }
 
     undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
-        let movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
+        let movingAggregate = queryBus.getAggregate(realityId, this.movingHash) as WorkflowAggregate;
         let workflow = queryBus.getRootObject(realityId) as Workflow;
         let parentsChildren = workflow.rootAggregate();
         parentsChildren.splice(parentsChildren.indexOf(movingAggregate), 1);

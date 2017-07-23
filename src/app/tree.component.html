@@ -1,16 +1,16 @@
 <table>
-	<tr *ngFor="let aggregate of aggregates" (click)="onSelectAggregate(realityId, aggregate, $event)" style="border: 1px darkorchid dashed"
-	 [style.background]="aggregate==viewState.selectedAggregate[realityId] ? 'yellow' : white">
-		<td style="border: 1px darkorchid dashed; width: 200px" pDraggable="workflow" (onDragStart)="onDragStart($event, aggregate)">
-			<button pButton class="ui-button-danger" icon="fa-window-close" (click)="deleteAggregate(realityId, aggregate.hash)"></button>
-			{{aggregate.name}} | {{aggregate.hash}}
+	<tr *ngFor="let aggregate of aggregates" (click)="onSelectAggregate(realityId, aggregate, $event)"
+	 		[style.background]="aggregate==viewState.selectedAggregate[realityId] ? 'yellow' : white">
+		<td class="w3-card" style="width: 200px" pDraggable="workflow" (onDragStart)="onDragStart($event, aggregate)">
+			<button pButton class="ui-button-danger" icon="fa-window-close" (click)="deleteAggregate(realityId, aggregate.hash)"></button>			
+			<span>{{aggregate.name}} | {{aggregate.hash}}</span>
 			<div>
 				<fwb-property-editor *ngFor="let propertyKvp of aggregate.properties | values" [key]="propertyKvp.key" [property]="propertyKvp.value"
 				 (valueChanged)="updateProperty(realityId, aggregate, propertyKvp.key, $event)"></fwb-property-editor>
 				<!--<span *ngFor="let property of aggregate.properties | values"></span>-->
 			</div>
 		</td>
-		<td style="border: 1px darkorchid dashed">
+		<td class="w3-card">
 			<fwb-tree-node [aggregate]="aggregate" [realityId]="realityId"></fwb-tree-node>
 		</td>
 	</tr>

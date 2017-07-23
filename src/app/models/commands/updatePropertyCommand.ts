@@ -19,7 +19,7 @@ export class UpdatePropertyCommand extends FutureTargetSettableCommand {
     ) { super(); }
 
     execute = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
-        const target = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
+        const target = queryBus.getAggregate(realityId, this.targetHash) as WorkflowAggregate;
         this.previousValue = target.properties[this.propertyKey].value;
         target.properties[this.propertyKey].value = this.value;
 
@@ -27,7 +27,7 @@ export class UpdatePropertyCommand extends FutureTargetSettableCommand {
     }
 
     undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
-        const target = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
+        const target = queryBus.getAggregate(realityId, this.targetHash) as WorkflowAggregate;
         target.properties[this.propertyKey].value = this.previousValue;
     }
 

@@ -1,8 +1,11 @@
 <table>
-    <tr *ngFor="let eventName of aggregateEvents()" (click)="onSelectAggregate(realityId, aggregate, eventName, $event)" style="border: 1px burlywood dashed"
-        [style.background]="aggregate==viewState.selectedAggregate[realityId] && eventName == viewState.selectedEvent[realityId] ? 'lime' : white" pDroppable="workflow" (onDrop)="onDrop(aggregate, eventName, $event)">
+    <tr *ngFor="let eventName of aggregateEvents()" (click)="onSelectAggregate(realityId, aggregate, eventName, $event)"
+        [style.background]="aggregate==viewState.selectedAggregate[realityId] && eventName == viewState.selectedEvent[realityId] ? 'lime' : white" 
+        pDroppable="workflow" (onDrop)="onDrop(aggregate, eventName, $event)">
         <span>{{eventName}} -</span>
-        <td style="border: 1px darkorchid dashed">
+        <td [ngClass]="aggregate.events[eventName].length === 0 ? 'w3-card' : ''" 
+                [style.width]="aggregate.events[eventName].length === 0 ? '20px' : ''"
+                [style.height]="aggregate.events[eventName].length === 0 ? '20px' : ''">
             <fwb-tree [aggregates]="aggregate.events[eventName]" [realityId]="realityId"></fwb-tree>
         </td>
     </tr>

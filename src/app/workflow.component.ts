@@ -62,6 +62,13 @@ export class WorkflowComponent implements OnInit {
                     this.addAggregate(realityId, this.viewState.getSelectedAggregate(realityId),
                         this.viewState.getSelectedEvent(realityId), 'SendEmailWorkflowAggregate');
                 }
+            }, {
+                label: 'Request Input',
+                command: () => {
+                    const realityId = this.getRealityId();
+                    this.addAggregate(realityId, this.viewState.getSelectedAggregate(realityId),
+                        this.viewState.getSelectedEvent(realityId), 'RequestInputWorkflowAggregate');
+                }
             }
         ];
     }
@@ -92,7 +99,7 @@ export class WorkflowComponent implements OnInit {
     }
 
     addRandomAggregate = (realityId: number, parent: WorkflowAggregate, event: string): void => {
-        const random = Math.floor(Math.random() * 3);
+        const random = Math.floor(Math.random() * 4);
         this.availableAggregates[random].command();
     }
 

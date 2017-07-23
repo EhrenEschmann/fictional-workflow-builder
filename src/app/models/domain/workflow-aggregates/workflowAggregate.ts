@@ -1,8 +1,8 @@
 import { Dictionary } from '../../collections/dictionary';
-import { AggregateRoot } from '../aggregateRoot';
+import { Aggregate } from '../aggregate';
 import { Property } from '../property';
 
-export abstract class WorkflowAggregate implements AggregateRoot {
+export abstract class WorkflowAggregate implements Aggregate {
     abstract name: string;
     parent: Array<WorkflowAggregate>;
     parentAggregate: WorkflowAggregate;

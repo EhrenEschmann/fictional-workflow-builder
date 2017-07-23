@@ -24,8 +24,8 @@
                 {{conflict.getToValue()}}
             </td>
             <td>
-                <button pButton (click)="resolveConflict(conflict, Resolution.Parent)" label="take parent"></button>
-                <button pButton (click)="resolveConflict(conflict, Resolution.Child)" label="take child"></button>
+                <button pButton (click)="resolveConflict(conflict, Resolution.Parent)" label="Take From"></button>
+                <button pButton (click)="resolveConflict(conflict, Resolution.Child)" label="Take To"></button>
             </td>
         </tr>
     </table>
@@ -46,7 +46,6 @@
     label="Add Random Aggregate" [model]="availableAggregates">
 </p-splitButton>
 <p-dropdown [options]="getCommandTitles(getRealityId())" [style]="{'width':'250px'}"></p-dropdown>
-
 <span>{{getStackLengths(getRealityId()).join(' + ')}}</span>
 
 <fwb-tree [aggregates]="getRootAggregates()" [realityId]="getRealityId()">

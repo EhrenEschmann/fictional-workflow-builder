@@ -21,8 +21,8 @@ export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCo
     ) { super(); }
 
     execute = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
-        const parentAggregate = queryBus.getAggregateRoot(realityId, this.parentHash) as WorkflowAggregate;
-        const movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
+        const parentAggregate = queryBus.getAggregate(realityId, this.parentHash) as WorkflowAggregate;
+        const movingAggregate = queryBus.getAggregate(realityId, this.movingHash) as WorkflowAggregate;
         if (parentAggregate.events[this.parentEvent].indexOf(movingAggregate) !== -1)
             throw new Error(`Aggregate Already exists at ${this.parentHash}, ${this.parentEvent}`);
 
@@ -42,7 +42,7 @@ export class MoveWorkflowAggregateToTargetCommand extends FutureTargetSettableCo
     }
 
     undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
-        let movingAggregate = queryBus.getAggregateRoot(realityId, this.movingHash) as WorkflowAggregate;
+        let movingAggregate = queryBus.getAggregate(realityId, this.movingHash) as WorkflowAggregate;
         let parentsChildren = movingAggregate.parent;
         parentsChildren.splice(parentsChildren.indexOf(movingAggregate), 1);
         if (this.previousParent) {

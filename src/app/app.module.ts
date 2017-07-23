@@ -29,6 +29,7 @@ import { HotkeyModule } from 'angular2-hotkeys';
 import './models/domain/workflow-aggregates/executeCompiledBinaryWorkflowAggregate';
 import './models/domain/workflow-aggregates/postRestApiWorkflowAggregate';
 import './models/domain/workflow-aggregates/sendEmailWorkflowAggregate';
+import './models/domain/workflow-aggregates/requestInputWorkflowAggregate';
 
 import './models/commands/moveWorkflowAggregateToTargetCommand';
 import './models/commands/moveWorkflowAggregateToRootCommand';

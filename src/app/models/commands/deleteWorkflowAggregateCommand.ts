@@ -14,7 +14,7 @@ export class DeleteWorkflowAggregateCommand extends Command {
     ) { super(); }
 
     execute = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
-        let aggregate = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
+        let aggregate = queryBus.getAggregate(realityId, this.targetHash) as WorkflowAggregate;
         this.originalIndex = aggregate.parent.indexOf(aggregate);
         if (this.originalIndex === -1)
             throw new Error('aggregate not part of workflow');
@@ -24,7 +24,7 @@ export class DeleteWorkflowAggregateCommand extends Command {
     }
 
     undo = (realityId: number, queryBus: QueryBus, typeStoreFactory: TypeStoreFactory) => {
-        let aggregate = queryBus.getAggregateRoot(realityId, this.targetHash) as WorkflowAggregate;
+        let aggregate = queryBus.getAggregate(realityId, this.targetHash) as WorkflowAggregate;
         aggregate.parent.splice(this.originalIndex, 0, aggregate);
     }
 

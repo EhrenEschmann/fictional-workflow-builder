@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AggregateRoot } from '../models/domain/aggregateRoot';
+import { Aggregate } from '../models/domain/aggregate';
 import { Workflow } from '../models/domain/workflow';
 import { DomainCache } from './domain-cache.service';
 import { DomainStore } from './domain-store.service';
@@ -20,16 +20,7 @@ export class QueryBus {
     return this.domainStore.getRealities();
   }
 
-  getTypedAggregateRoot = <T>(realityId: number, hash: string): T => {
-    throw new Error('Not Built Yet.');
-  }
-
-  getAggregateRoot = (realityId: number, hash: string): AggregateRoot => {
+  getAggregate = (realityId: number, hash: string): Aggregate => {
     return this.domainCache.get(realityId, hash);
-  }
-
-  query = (target: AggregateRoot, query: Array<string>): any => {
-    if (query[0])
-      return this.query(target[query[0]], query.slice(1));
   }
 }
