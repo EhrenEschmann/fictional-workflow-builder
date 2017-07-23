@@ -8,9 +8,9 @@ import { Command } from '../models/commands/command';
 import { CommandOptimizer } from './command-optimizer.service';
 import { CommandConflict } from '../models/command-domain/commandConflict';
 
-import { CreateNewWorkflowAggregateCommand } from '../models/commands/createNewWorkflowAggregateCommand';
-import { MoveWorkflowAggregateToTargetCommand } from '../models/commands/moveWorkflowAggregateToTargetCommand';
-import { UpdatePropertyCommand } from '../models/commands/updatePropertyCommand';
+// import { CreateNewWorkflowAggregateCommand } from '../models/commands/createNewWorkflowAggregateCommand';
+// import { MoveWorkflowAggregateToTargetCommand } from '../models/commands/moveWorkflowAggregateToTargetCommand';
+// import { UpdatePropertyCommand } from '../models/commands/updatePropertyCommand';
 
 // TODO:  The public contract should all exist on the command or querybus (commandBus.initialize(), queryBus.initialize())
 @Injectable()
